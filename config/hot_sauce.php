@@ -20,6 +20,7 @@ return [
             'stripe_product_id' => env('STRIPE_CODERS_CLASSIC_HOT'),
             'accent' => '#f97316',
             'glow' => 'rgba(249, 115, 22, 0.45)',
+            'image' => '/images/products/coders-classic-hot-sauce.png',
         ],
         [
             'slug' => 'coders-hot-mango',
@@ -35,6 +36,7 @@ return [
             'stripe_product_id' => env('STRIPE_CODERS_MANGO_HOT'),
             'accent' => '#fb923c',
             'glow' => 'rgba(251, 146, 60, 0.42)',
+            'image' => '/images/products/coders-mango-hot-sauce.png',
         ],
         [
             'slug' => 'coders-hot-honey',
@@ -50,6 +52,7 @@ return [
             'stripe_product_id' => env('STRIPE_CODERS_HONEY_HOT'),
             'accent' => '#facc15',
             'glow' => 'rgba(250, 204, 21, 0.35)',
+            'image' => '/images/products/coders-honey-hot-sauce.png',
         ],
         [
             'slug' => 'coders-hot-chocolate',
@@ -65,6 +68,7 @@ return [
             'stripe_product_id' => env('STRIPE_CODERS_CHOCOLATE_HOT'),
             'accent' => '#f87171',
             'glow' => 'rgba(248, 113, 113, 0.34)',
+            'image' => '/images/products/coders-chocolate-hot-sauce.png',
         ],
     ],
     'merch_products' => [

@@ -1,7 +1,7 @@
 <script setup>
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import axios from 'axios';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
 const props = defineProps({
     canLogin: {
@@ -22,7 +22,7 @@ const props = defineProps({
     },
     boxName: {
         type: String,
-        default: "Coder's Hot Sauce Box",
+        default: "Coder's Slot Machine",
     },
 });
 
@@ -35,9 +35,123 @@ const checkoutError = ref('');
 const clubSilverError = ref('');
 const loadingCheckout = ref(false);
 const loadingClubSilver = ref(false);
-const counts = ref(
-    Object.fromEntries(props.products.map((product) => [product.slug, 0])),
+
+// Fruit machine state
+const EMPTY = { slug: null, name: 'Empty', size_label: 'No sauce selected', accent: '#44403c' };
+const reelItems = computed(() => [EMPTY, ...props.products]);
+const slotIndices = ref([0, 0, 0]);
+const spinDirections = ref(['', '', '']);
+const isSpinning = ref(false);
+const jackpot = ref(false);
+
+const getReelItem = (slotI, offset = 0) => {
+    const items = reelItems.value;
+    const len = items.length;
+    const idx = ((slotIndices.value[slotI] + offset) % len + len) % len;
+    return items[idx];
+};
+
+const spinUp = (i) => {
+    if (isSpinning.value) return;
+    spinDirections.value[i] = 'up';
+    const len = reelItems.value.length;
+    slotIndices.value[i] = ((slotIndices.value[i] - 1) + len) % len;
+    setTimeout(() => { spinDirections.value[i] = ''; }, 280);
+};
+
+const spinDown = (i) => {
+    if (isSpinning.value) return;
+    spinDirections.value[i] = 'down';
+    slotIndices.value[i] = (slotIndices.value[i] + 1) % reelItems.value.length;
+    setTimeout(() => { spinDirections.value[i] = ''; }, 280);
+};
+
+const spinReelToTarget = async (i, targetIdx) => {
+    const spinCount = 6 + Math.floor(Math.random() * 4);
+    for (let s = 0; s < spinCount; s++) {
+        spinDirections.value[i] = 'down';
+        slotIndices.value[i] = (slotIndices.value[i] + 1) % reelItems.value.length;
+        await new Promise(r => setTimeout(r, 100));
+    }
+    // Final landing
+    spinDirections.value[i] = 'down';
+    slotIndices.value[i] = targetIdx;
+    await new Promise(r => setTimeout(r, 340));
+    spinDirections.value[i] = '';
+};
+
+const randomBox = async () => {
+    if (isSpinning.value) return;
+    isSpinning.value = true;
+    checkoutError.value = '';
+
+    const productCount = props.products.length;
+    const targets = Array.from({ length: 3 }, () =>
+        Math.floor(Math.random() * productCount) + 1,
+    );
+
+    // Stagger reel starts for that classic slot machine feel
+    await Promise.all(
+        targets.map((target, i) =>
+            new Promise(resolve =>
+                setTimeout(() => spinReelToTarget(i, target).then(resolve), i * 260),
+            ),
+        ),
+    );
+
+    isSpinning.value = false;
+};
+
+const resetBox = () => {
+    if (isSpinning.value) return;
+    slotIndices.value = [0, 0, 0];
+};
+
+onMounted(() => {
+    setTimeout(randomBox, 400);
+});
+
+// Derived from slot machine
+const selectedSlots = computed(() =>
+    slotIndices.value.map(i => {
+        const item = reelItems.value[i];
+        return item.slug ? item : null;
+    }),
 );
+
+const totalBottles = computed(() => selectedSlots.value.filter(Boolean).length);
+
+const isBoxFull = computed(() => totalBottles.value === props.boxLimit);
+
+watch(isBoxFull, (full) => {
+    if (full) {
+        jackpot.value = true;
+        setTimeout(() => { jackpot.value = false; }, 2600);
+    }
+});
+
+const counts = computed(() =>
+    props.products.reduce((acc, p) => {
+        acc[p.slug] = selectedSlots.value.filter(s => s?.slug === p.slug).length;
+        return acc;
+    }, {}),
+);
+
+const subtotal = computed(() => {
+    if (totalBottles.value === props.boxLimit) return 1999;
+    return props.products.reduce(
+        (sum, p) => sum + (counts.value[p.slug] ?? 0) * Number(p.unit_amount ?? 0),
+        0,
+    );
+});
+
+const selectedItemsPayload = computed(() =>
+    props.products
+        .filter(p => (counts.value[p.slug] ?? 0) > 0)
+        .map(p => ({ product: p.slug, quantity: counts.value[p.slug] })),
+);
+
+const remainingSlots = computed(() => props.boxLimit - totalBottles.value);
 
 const credibility = [
     {
@@ -69,48 +183,9 @@ const testimonials = [
     },
 ];
 
-const totalBottles = computed(() =>
-    Object.values(counts.value).reduce((total, quantity) => total + quantity, 0),
-);
-
-const subtotal = computed(() => {
-    if (totalBottles.value === props.boxLimit) {
-        return 1999;
-    }
-    return props.products.reduce(
-        (sum, product) => sum + (counts.value[product.slug] ?? 0) * Number(product.unit_amount ?? 0),
-        0,
-    );
-});
-
-const selectedSlots = computed(() =>
-    props.products.flatMap((product) =>
-        Array.from({ length: counts.value[product.slug] ?? 0 }, () => product),
-    ),
-);
-
-const selectedItemsPayload = computed(() =>
-    props.products
-        .filter((product) => (counts.value[product.slug] ?? 0) > 0)
-        .map((product) => ({
-            product: product.slug,
-            quantity: counts.value[product.slug],
-        })),
-);
-
-const remainingSlots = computed(() => props.boxLimit - totalBottles.value);
-
-const canAddBottle = computed(() => totalBottles.value < props.boxLimit);
-
 const checkoutLabel = computed(() => {
-    if (loadingCheckout.value) {
-        return 'Opening Checkout...';
-    }
-
-    if (totalBottles.value === 0) {
-        return 'Checkout the Box';
-    }
-
+    if (loadingCheckout.value) return 'Opening Checkout...';
+    if (totalBottles.value === 0) return 'Checkout the Box';
     return `Checkout ${totalBottles.value} Bottle${totalBottles.value === 1 ? '' : 's'}`;
 });
 
@@ -127,10 +202,7 @@ const formatMoney = (amount) =>
     }).format(amount / 100);
 
 const formatDate = (value) => {
-    if (!value) {
-        return 'Pending activation';
-    }
-
+    if (!value) return 'Pending activation';
     return new Intl.DateTimeFormat('en-GB', {
         day: 'numeric',
         month: 'long',
@@ -139,26 +211,6 @@ const formatDate = (value) => {
 };
 
 const heatScale = (level) => `${'●'.repeat(level)}${'○'.repeat(Math.max(0, 5 - level))}`;
-
-const addBottle = (slug) => {
-    if (totalBottles.value >= props.boxLimit) {
-        return;
-    }
-
-    counts.value[slug] = (counts.value[slug] ?? 0) + 1;
-};
-
-const removeBottle = (slug) => {
-    if ((counts.value[slug] ?? 0) === 0) {
-        return;
-    }
-
-    counts.value[slug] -= 1;
-};
-
-const resetBox = () => {
-    counts.value = Object.fromEntries(props.products.map((product) => [product.slug, 0]));
-};
 
 const startCheckout = async () => {
     if (selectedItemsPayload.value.length === 0) {
@@ -289,40 +341,236 @@ const startClubSilverCheckout = async () => {
                         </div>
                     </div>
 
+                    <!-- Slot Machine Builder -->
                     <div id="builder" class="hero-panel">
                         <div class="flex items-start justify-between gap-4">
                             <div>
-                                <p class="section-label">Live builder</p>
+                                <p class="section-label">Slot machine</p>
                                 <h2 class="mt-4 font-display text-5xl uppercase tracking-[0.08em] text-stone-50">
                                     {{ boxName }}
                                 </h2>
                             </div>
                             <span class="chip bg-orange-500/15 text-orange-200">
-                                {{ totalBottles }}/{{ boxLimit }} selected
+                                {{ totalBottles }}/{{ boxLimit }} filled
                             </span>
                         </div>
 
                         <p class="mt-6 max-w-md text-base leading-8 text-stone-300">
-                            Choose three bottles to fill the box. Delivered anywhere in the UK for £19.99 total.
+                            Spin each reel to pick your sauce. Or let the machine choose.
                         </p>
 
-                        <div class="mt-8 grid gap-4 sm:grid-cols-3">
-                            <div
-                                v-for="slot in boxLimit"
-                                :key="slot"
-                                class="rounded-[1.6rem] border border-white/10 bg-black/30 p-5"
-                            >
-                                <p class="text-xs uppercase tracking-[0.24em] text-stone-500">Slot {{ slot }}</p>
-                                <p class="mt-3 text-sm leading-6 text-stone-100">
-                                    {{ selectedSlots[slot - 1]?.name || 'Empty slot' }}
+                        <!-- Machine outer shell -->
+                        <div
+                            class="machine-shell mt-8"
+                            :class="{ 'jackpot-active': jackpot }"
+                        >
+                            <!-- Top panel: marquee lights -->
+                            <div class="flex items-center justify-between gap-2 border-b border-white/[0.04] bg-gradient-to-b from-black/50 to-black/20 px-4 py-3">
+                                <div class="flex gap-[5px]">
+                                    <div
+                                        v-for="j in 8"
+                                        :key="j"
+                                        class="h-2 w-2 rounded-full border border-white/[0.08] bg-stone-900 transition-[background,box-shadow] duration-200"
+                                        :class="{ 'bulb-on': isBoxFull || (isSpinning && j % 2 === 0) }"
+                                        :style="{ animationDelay: `${j * 80}ms` }"
+                                    />
+                                </div>
+                                <p
+                                    class="font-display whitespace-nowrap text-[0.6rem] uppercase tracking-[0.28em] transition-colors duration-300"
+                                    :class="jackpot ? 'text-orange-300' : 'text-stone-300/40'"
+                                >
+                                    {{ isBoxFull ? '★ JACKPOT ★' : '— CODERS HOT SAUCE —' }}
                                 </p>
-                                <p class="mt-2 text-xs uppercase tracking-[0.24em] text-stone-500">
-                                    {{ selectedSlots[slot - 1]?.size_label || 'Add a 125ml bottle' }}
-                                </p>
+                                <div class="flex gap-[5px]">
+                                    <div
+                                        v-for="j in 8"
+                                        :key="j"
+                                        class="h-2 w-2 rounded-full border border-white/[0.08] bg-stone-900 transition-[background,box-shadow] duration-200"
+                                        :class="{ 'bulb-on': isBoxFull || (isSpinning && j % 2 !== 0) }"
+                                        :style="{ animationDelay: `${j * 80}ms` }"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- Slot progress dots -->
+                            <div class="flex items-center justify-center gap-2 border-b border-white/[0.03] bg-black/25 px-4 py-2">
+                                <div
+                                    v-for="j in boxLimit"
+                                    :key="j"
+                                    class="h-2.5 w-2.5 rounded-full border border-white/10 bg-white/[0.06] transition-[background,box-shadow] duration-300"
+                                    :style="totalBottles >= j && selectedSlots[j - 1]
+                                        ? { backgroundColor: selectedSlots[j - 1].accent, boxShadow: `0 0 8px ${selectedSlots[j - 1].accent}80` }
+                                        : {}"
+                                />
+                            </div>
+
+                            <!-- Machine body: reels -->
+                            <div class="flex items-stretch px-2 py-4">
+                                <!-- Left chrome rail -->
+                                <div class="w-[10px] shrink-0 rounded-sm bg-gradient-to-b from-white/[0.06] via-white/[0.02] to-black/20" />
+
+                                <!-- Reels -->
+                                <div class="flex flex-1 items-start px-2">
+                                    <template v-for="(_, i) in slotIndices" :key="i">
+                                        <!-- Reel separator -->
+                                        <div v-if="i > 0" class="w-px shrink-0 self-stretch bg-gradient-to-b from-transparent via-white/10 to-transparent" />
+
+                                        <!-- Reel column -->
+                                        <div class="flex flex-1 flex-col items-center gap-[0.4rem] px-1.5">
+                                            <!-- Spin up -->
+                                            <button
+                                                type="button"
+                                                class="reel-btn flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-white/[0.08] bg-gradient-to-br from-white/[0.04] to-black/30 text-[0.55rem] text-stone-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_2px_4px_rgba(0,0,0,0.4)] transition-all duration-150 active:scale-90 disabled:cursor-not-allowed disabled:opacity-35"
+                                                :disabled="isSpinning"
+                                                @click="spinUp(i)"
+                                                aria-label="Previous sauce"
+                                            >
+                                                ▲
+                                            </button>
+
+                                            <!-- Reel viewport -->
+                                            <div
+                                                class="reel-viewport relative h-[350px] w-full overflow-hidden rounded-[14px] border bg-black/[0.82] shadow-[inset_0_2px_16px_rgba(0,0,0,0.8),inset_0_0_0_1px_rgba(255,255,255,0.03)] transition-[border-color] duration-300"
+                                                :style="{
+                                                    borderColor: slotIndices[i] !== 0
+                                                        ? getReelItem(i).accent + '60'
+                                                        : 'rgba(255,255,255,0.06)',
+                                                    '--reel-glow': slotIndices[i] !== 0
+                                                        ? getReelItem(i).accent
+                                                        : 'transparent',
+                                                }"
+                                            >
+                                                <!-- Reel contents -->
+                                                <div class="relative z-[2] flex h-full flex-col">
+                                                    <!-- Previous item -->
+                                                    <div class="flex h-[70px] shrink-0 flex-col items-center justify-center px-2 opacity-[0.5]">
+                                                        <img
+                                                            v-if="getReelItem(i, -1).image"
+                                                            :src="getReelItem(i, -1).image"
+                                                            class="h-full w-full object-contain p-1 px-2.5"
+                                                            alt=""
+                                                        />
+                                                        <span v-else class="font-display text-[0.68rem] uppercase leading-snug tracking-[0.16em] text-stone-400 text-center">
+                                                            {{ getReelItem(i, -1).slug
+                                                                ? getReelItem(i, -1).name.replace("Coder's Hot ", '')
+                                                                : '—' }}
+                                                        </span>
+                                                    </div>
+
+                                                    <!-- Selected item (animated) -->
+                                                    <div class="relative h-[180px] shrink-0 overflow-hidden">
+                                                        <Transition :name="spinDirections[i] === 'up' ? 'reel-up' : 'reel-down'">
+                                                            <div
+                                                                :key="slotIndices[i]"
+                                                                class="absolute inset-0 flex flex-col items-center justify-center gap-[3px] px-2"
+                                                            >
+                                                                <template v-if="slotIndices[i] !== 0">
+                                                                    <img
+                                                                        v-if="getReelItem(i).image"
+                                                                        :src="getReelItem(i).image"
+                                                                        class="h-full w-full shrink-0 object-contain p-1 px-2.5 transition-[filter] duration-300"
+                                                                        :style="{ filter: `drop-shadow(0 0 8px ${getReelItem(i).accent}90)` }"
+                                                                        alt=""
+                                                                    />
+                                                                    <template v-else>
+                                                                        <div
+                                                                            class="h-1.5 w-1.5 shrink-0 rounded-full transition-colors duration-300"
+                                                                            :style="{ backgroundColor: getReelItem(i).accent }"
+                                                                        />
+                                                                        <p
+                                                                            class="font-display text-base uppercase leading-[1.1] tracking-[0.06em] text-center transition-colors duration-200"
+                                                                            :style="{ color: getReelItem(i).accent }"
+                                                                        >
+                                                                            {{ getReelItem(i).name.replace("Coder's Hot ", '') }}
+                                                                        </p>
+                                                                    </template>
+                                                                </template>
+                                                                <template v-else>
+                                                                    <p class="font-display text-base uppercase leading-[1.1] tracking-[0.06em] text-center text-stone-600">Empty</p>
+                                                                    <p class="text-center text-[0.55rem] uppercase tracking-[0.22em] text-stone-600">Select a sauce</p>
+                                                                </template>
+                                                            </div>
+                                                        </Transition>
+                                                    </div>
+
+                                                    <!-- Next item -->
+                                                    <div class="flex h-[70px] shrink-0 flex-col items-center justify-center px-2 opacity-[0.5]">
+                                                        <img
+                                                            v-if="getReelItem(i, 1).image"
+                                                            :src="getReelItem(i, 1).image"
+                                                            class="h-full w-full object-contain p-1 px-2.5"
+                                                            alt=""
+                                                        />
+                                                        <span v-else class="font-display text-[0.68rem] uppercase leading-snug tracking-[0.16em] text-stone-400 text-center">
+                                                            {{ getReelItem(i, 1).slug
+                                                                ? getReelItem(i, 1).name.replace("Coder's Hot ", '')
+                                                                : '—' }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Win-line overlay (centre band) -->
+                                                <div
+                                                    class="pointer-events-none absolute inset-x-0 top-[70px] z-10 h-[70px] border-b border-t transition-[border-color,background] duration-300"
+                                                    :style="{
+                                                        borderTopColor: slotIndices[i] !== 0
+                                                            ? getReelItem(i).accent + '50'
+                                                            : 'rgba(251,146,60,0.12)',
+                                                        borderBottomColor: slotIndices[i] !== 0
+                                                            ? getReelItem(i).accent + '50'
+                                                            : 'rgba(251,146,60,0.12)',
+                                                        background: slotIndices[i] !== 0
+                                                            ? getReelItem(i).accent + '0c'
+                                                            : 'rgba(251,146,60,0.02)',
+                                                    }"
+                                                />
+
+                                                <!-- Glass gloss -->
+                                                <div class="pointer-events-none absolute inset-0 z-[15] rounded-[inherit] bg-gradient-to-b from-white/[0.05] via-transparent to-black/[0.15]" />
+
+                                                <!-- Scanlines -->
+                                                <div class="pointer-events-none absolute inset-0 z-20 bg-[repeating-linear-gradient(0deg,transparent,transparent_3px,rgba(0,0,0,0.1)_3px,rgba(0,0,0,0.1)_4px)]" />
+                                            </div>
+
+                                            <!-- Spin down -->
+                                            <button
+                                                type="button"
+                                                class="reel-btn flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-white/[0.08] bg-gradient-to-br from-white/[0.04] to-black/30 text-[0.55rem] text-stone-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_2px_4px_rgba(0,0,0,0.4)] transition-all duration-150 active:scale-90 disabled:cursor-not-allowed disabled:opacity-35"
+                                                :disabled="isSpinning"
+                                                @click="spinDown(i)"
+                                                aria-label="Next sauce"
+                                            >
+                                                ▼
+                                            </button>
+
+                                            <!-- Slot number plate -->
+                                            <div class="flex h-[22px] w-[22px] items-center justify-center rounded-full border border-white/[0.08] bg-black/50 font-display text-[0.6rem] tracking-[0.05em] text-white/25">
+                                                {{ i + 1 }}
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <!-- Right chrome rail -->
+                                <div class="w-[10px] shrink-0 rounded-sm bg-gradient-to-b from-white/[0.06] via-white/[0.02] to-black/20" />
+                            </div>
+
+                            <!-- Machine bottom: Random spin button -->
+                            <div class="flex items-center justify-center border-t border-white/[0.04] bg-gradient-to-b from-black/20 to-black/50 px-4 py-3">
+                                <button
+                                    type="button"
+                                    class="spin-random-btn flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-orange-500/35 bg-gradient-to-br from-orange-500/[0.18] to-orange-600/[0.08] px-6 py-[0.65rem] font-display text-[0.75rem] uppercase tracking-[0.22em] text-orange-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_0_16px_rgba(249,115,22,0.1)] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
+                                    :disabled="isSpinning"
+                                    @click="randomBox"
+                                >
+                                    <span class="text-[0.9rem]">⚡</span>
+                                    {{ isSpinning ? 'Spinning…' : 'Spin Random' }}
+                                </button>
                             </div>
                         </div>
 
-                        <div class="mt-8 rounded-[1.8rem] border border-white/10 bg-black/25 p-5">
+                        <!-- Summary -->
+                        <div class="mt-6 rounded-[1.8rem] border border-white/10 bg-black/25 p-5">
                             <div class="flex items-center justify-between text-sm uppercase tracking-[0.2em] text-stone-400">
                                 <span>Box subtotal</span>
                                 <span class="font-display text-4xl tracking-[0.08em] text-stone-50">
@@ -335,7 +583,7 @@ const startClubSilverCheckout = async () => {
                             </p>
                         </div>
 
-                        <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+                        <div class="mt-6 flex flex-col gap-3 sm:flex-row">
                             <button
                                 type="button"
                                 class="fire-button"
@@ -347,7 +595,7 @@ const startClubSilverCheckout = async () => {
                             <button
                                 type="button"
                                 class="ghost-button"
-                                :disabled="totalBottles === 0"
+                                :disabled="totalBottles === 0 || isSpinning"
                                 @click="resetBox"
                             >
                                 Clear Box
@@ -382,7 +630,13 @@ const startClubSilverCheckout = async () => {
                             <div class="relative z-10 flex h-full flex-col">
                                 <div class="flex items-start justify-between gap-4">
                                     <p class="section-label">{{ product.size_label }}</p>
-                                     <span class="chip border-white/10 bg-white/5 text-stone-300">
+                                    <span
+                                        v-if="counts[product.slug] > 0"
+                                        class="chip border-white/10 bg-white/5 text-stone-300"
+                                    >
+                                        ×{{ counts[product.slug] }} in box
+                                    </span>
+                                    <span v-else class="chip border-white/10 bg-white/5 text-stone-300">
                                         Box Item
                                     </span>
                                 </div>
@@ -406,31 +660,6 @@ const startClubSilverCheckout = async () => {
                                     <span class="font-display text-2xl tracking-[0.16em]" :style="{ color: product.accent }">
                                         {{ heatScale(product.heat_level) }}
                                     </span>
-                                </div>
-
-                                <div class="mt-6 flex items-center justify-between rounded-[1.4rem] border border-white/10 bg-black/25 px-4 py-3">
-                                    <button
-                                        type="button"
-                                        class="quantity-button"
-                                        :disabled="(counts[product.slug] ?? 0) === 0"
-                                        @click="removeBottle(product.slug)"
-                                    >
-                                        -
-                                    </button>
-                                    <div class="text-center">
-                                        <p class="text-xs uppercase tracking-[0.24em] text-stone-500">In box</p>
-                                        <p class="mt-1 font-display text-4xl uppercase tracking-[0.08em] text-stone-50">
-                                            {{ counts[product.slug] ?? 0 }}
-                                        </p>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        class="quantity-button"
-                                        :disabled="!canAddBottle"
-                                        @click="addBottle(product.slug)"
-                                    >
-                                        +
-                                    </button>
                                 </div>
                             </div>
                         </article>
@@ -500,3 +729,103 @@ const startClubSilverCheckout = async () => {
         </div>
     </div>
 </template>
+
+<style scoped>
+/* ─── Machine shell (175deg gradient + multi-layer box-shadow can't be Tailwind) ── */
+.machine-shell {
+    border-radius: 1.6rem;
+    background: linear-gradient(175deg, #1c1917 0%, #0a0907 55%, #161009 100%);
+    border: 1px solid rgba(120, 113, 108, 0.28);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        inset 0 -6px 24px rgba(0, 0, 0, 0.7),
+        0 0 0 3px rgba(0, 0, 0, 0.5),
+        0 0 0 4px rgba(100, 90, 80, 0.12),
+        0 12px 40px rgba(0, 0, 0, 0.55);
+    overflow: hidden;
+    transition: box-shadow 0.4s ease;
+}
+
+@keyframes jackpot-pulse {
+    0%, 100% {
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.06),
+            inset 0 -6px 24px rgba(0, 0, 0, 0.7),
+            0 0 0 3px rgba(0, 0, 0, 0.5),
+            0 0 0 4px rgba(100, 90, 80, 0.12),
+            0 12px 40px rgba(0, 0, 0, 0.55);
+    }
+    50% {
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.06),
+            inset 0 -6px 24px rgba(0, 0, 0, 0.7),
+            0 0 0 3px rgba(0, 0, 0, 0.5),
+            0 0 0 4px rgba(249, 115, 22, 0.5),
+            0 12px 60px rgba(249, 115, 22, 0.35),
+            0 0 80px rgba(249, 115, 22, 0.15);
+    }
+}
+
+.machine-shell.jackpot-active {
+    animation: jackpot-pulse 0.55s ease-in-out 4;
+}
+
+/* ─── Marquee bulb lit state + flicker animation ─────────────── */
+@keyframes bulb-flicker {
+    from { opacity: 1; }
+    to { opacity: 0.75; }
+}
+
+.bulb-on {
+    background: #f97316 !important;
+    border-color: #fb923c !important;
+    box-shadow: 0 0 6px #f97316, 0 0 12px rgba(249, 115, 22, 0.4);
+    animation: bulb-flicker 0.8s ease-in-out infinite alternate;
+}
+
+/* ─── Reel viewport outer glow (::after pseudo-element) ──────── */
+.reel-viewport::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: 0 0 20px -4px var(--reel-glow, transparent);
+    pointer-events: none;
+    z-index: 5;
+    transition: box-shadow 0.4s ease;
+}
+
+/* ─── Reel button hover gradient (gradient swap not doable in Tailwind) ── */
+.reel-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, rgba(249,115,22,0.25), rgba(249,115,22,0.08));
+    border-color: rgba(249, 115, 22, 0.4);
+    color: #fb923c;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 0 12px rgba(249,115,22,0.2);
+}
+
+/* ─── Spin random button hover ───────────────────────────────── */
+.spin-random-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, rgba(249,115,22,0.3) 0%, rgba(234,88,12,0.16) 100%);
+    border-color: rgba(249, 115, 22, 0.6);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 0 24px rgba(249,115,22,0.25);
+}
+
+/* ─── Vue reel transitions ───────────────────────────────────── */
+.reel-up-enter-from { transform: translateY(-100%); opacity: 0; }
+.reel-up-leave-to   { transform: translateY(100%);  opacity: 0; }
+.reel-up-enter-active { transition: transform 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.14s ease; }
+.reel-up-leave-active {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transition: transform 0.22s cubic-bezier(0.55, 0, 0.55, 0.2), opacity 0.14s ease;
+}
+
+.reel-down-enter-from { transform: translateY(100%);  opacity: 0; }
+.reel-down-leave-to   { transform: translateY(-100%); opacity: 0; }
+.reel-down-enter-active { transition: transform 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.14s ease; }
+.reel-down-leave-active {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transition: transform 0.22s cubic-bezier(0.55, 0, 0.55, 0.2), opacity 0.14s ease;
+}
+</style>
