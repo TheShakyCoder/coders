@@ -20,10 +20,6 @@ const props = defineProps({
         type: Number,
         default: 3,
     },
-    boxName: {
-        type: String,
-        default: "Coder's Slot Machine",
-    },
 });
 
 const page = usePage();
@@ -300,54 +296,14 @@ const startClubSilverCheckout = async () => {
             </header>
 
             <main class="flex-1">
-                <section class="grid items-start gap-10 pb-20 pt-14 lg:grid-cols-[1.02fr_0.98fr] lg:pt-20">
-                    <div class="space-y-8">
-                        <div class="space-y-4">
-                            <p class="section-label">Boxed heat, no filler</p>
-                            <h1 class="max-w-4xl font-display text-xl uppercase leading-[0.88] tracking-[0.06em] text-stone-50 sm:text-8xl">
-                                Four sauces.<br>Three slots.<br>One tasty box.
-                            </h1>
-                            <p class="max-w-2xl text-lg leading-8 text-stone-300 sm:text-xl">
-                                Build a box from four 125ml bottles:
-                                <strong class="text-stone-100"> Coder's Hot Classic</strong>,
-                                <strong class="text-stone-100"> Coder's Hot Mango</strong>,
-                                <strong class="text-stone-100"> Coder's Hot Honey</strong>,
-                                and <strong class="text-stone-100">Coder's Hot Chocolate</strong>.
-                                Delivered anywhere in the UK for a flat £19.99.
-                            </p>
-                        </div>
-
-                        <div class="flex flex-col gap-4 sm:flex-row">
-                            <a href="#builder" class="fire-button text-center">Build Your Box</a>
-                        </div>
-
-                        <p v-if="checkoutError" class="rounded-2xl border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
-                            {{ checkoutError }}
-                        </p>
-
-                        <div class="grid gap-4 sm:grid-cols-3">
-                            <article
-                                v-for="item in credibility"
-                                :key="item.title"
-                                class="stat-card"
-                            >
-                                <p class="text-xs uppercase tracking-[0.28em] text-orange-300">
-                                    {{ item.title }}
-                                </p>
-                                <p class="mt-3 text-sm leading-7 text-stone-300">
-                                    {{ item.copy }}
-                                </p>
-                            </article>
-                        </div>
-                    </div>
-
-                    <!-- Slot Machine Builder -->
+                <section class="pb-20 pt-14 lg:pt-20">
+                    <!-- Slot Machine Builder — full width -->
                     <div id="builder" class="hero-panel">
                         <div class="flex items-start justify-between gap-4">
                             <div>
                                 <p class="section-label">Slot machine</p>
                                 <h2 class="mt-4 font-display text-5xl uppercase tracking-[0.08em] text-stone-50">
-                                    {{ boxName }}
+                                    Coder's Slot Machine
                                 </h2>
                             </div>
                             <span class="chip bg-orange-500/15 text-orange-200">
@@ -420,17 +376,17 @@ const startClubSilverCheckout = async () => {
                                             <!-- Spin up -->
                                             <button
                                                 type="button"
-                                                class="reel-btn flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-white/[0.08] bg-gradient-to-br from-white/[0.04] to-black/30 text-[0.55rem] text-stone-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_2px_4px_rgba(0,0,0,0.4)] transition-all duration-150 active:scale-90 disabled:cursor-not-allowed disabled:opacity-35"
+                                                class="reel-btn uppercase text-[#fb923c] flex h-16 w-full cursor-pointer items-center justify-center rounded-md border border-white/[0.08] bg-gradient-to-br from-white/[0.04] to-black/30 text-[1.5rem] text-stone-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_2px_4px_rgba(0,0,0,0.4)] transition-all duration-150 active:scale-90 disabled:cursor-not-allowed disabled:opacity-35"
                                                 :disabled="isSpinning"
                                                 @click="spinUp(i)"
                                                 aria-label="Previous sauce"
                                             >
-                                                ▲
+                                                ▲ Up
                                             </button>
 
                                             <!-- Reel viewport -->
                                             <div
-                                                class="reel-viewport relative h-[350px] w-full overflow-hidden rounded-[14px] border bg-black/[0.82] shadow-[inset_0_2px_16px_rgba(0,0,0,0.8),inset_0_0_0_1px_rgba(255,255,255,0.03)] transition-[border-color] duration-300"
+                                                class="reel-viewport relative h-[550px] w-full overflow-hidden rounded-[14px] border bg-black/[0.82] shadow-[inset_0_2px_16px_rgba(0,0,0,0.8),inset_0_0_0_1px_rgba(255,255,255,0.03)] transition-[border-color] duration-300"
                                                 :style="{
                                                     borderColor: slotIndices[i] !== 0
                                                         ? getReelItem(i).accent + '60'
@@ -443,7 +399,7 @@ const startClubSilverCheckout = async () => {
                                                 <!-- Reel contents -->
                                                 <div class="relative z-[2] flex h-full flex-col">
                                                     <!-- Previous item -->
-                                                    <div class="flex h-[70px] shrink-0 flex-col items-center justify-center px-2 opacity-[0.5]">
+                                                    <div class="flex h-[100px] shrink-0 flex-col items-center justify-center px-2 opacity-[0.5]">
                                                         <img
                                                             v-if="getReelItem(i, -1).image"
                                                             :src="getReelItem(i, -1).image"
@@ -458,7 +414,7 @@ const startClubSilverCheckout = async () => {
                                                     </div>
 
                                                     <!-- Selected item (animated) -->
-                                                    <div class="relative h-[180px] shrink-0 overflow-hidden">
+                                                    <div class="relative h-[380px] shrink-0 overflow-hidden">
                                                         <Transition :name="spinDirections[i] === 'up' ? 'reel-up' : 'reel-down'">
                                                             <div
                                                                 :key="slotIndices[i]"
@@ -494,7 +450,7 @@ const startClubSilverCheckout = async () => {
                                                     </div>
 
                                                     <!-- Next item -->
-                                                    <div class="flex h-[70px] shrink-0 flex-col items-center justify-center px-2 opacity-[0.5]">
+                                                    <div class="flex h-[100px] shrink-0 flex-col items-center justify-center px-2 opacity-[0.5]">
                                                         <img
                                                             v-if="getReelItem(i, 1).image"
                                                             :src="getReelItem(i, 1).image"
@@ -535,12 +491,12 @@ const startClubSilverCheckout = async () => {
                                             <!-- Spin down -->
                                             <button
                                                 type="button"
-                                                class="reel-btn flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-white/[0.08] bg-gradient-to-br from-white/[0.04] to-black/30 text-[0.55rem] text-stone-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_2px_4px_rgba(0,0,0,0.4)] transition-all duration-150 active:scale-90 disabled:cursor-not-allowed disabled:opacity-35"
+                                                class="reel-btn uppercase text-[#00ff00] flex h-16 w-full cursor-pointer items-center justify-center rounded-md border border-white/[0.08] bg-gradient-to-br from-white/[0.04] to-black/30 text-[1.5rem] text-stone-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_2px_4px_rgba(0,0,0,0.4)] transition-all duration-150 active:scale-90 disabled:cursor-not-allowed disabled:opacity-35"
                                                 :disabled="isSpinning"
                                                 @click="spinDown(i)"
                                                 aria-label="Next sauce"
                                             >
-                                                ▼
+                                                ▼ Down
                                             </button>
 
                                             <!-- Slot number plate -->
@@ -600,6 +556,45 @@ const startClubSilverCheckout = async () => {
                             >
                                 Clear Box
                             </button>
+                        </div>
+                    </div>
+
+                    <!-- Hero copy — below the machine -->
+                    <div class="mt-14 grid gap-10 lg:grid-cols-[1fr_auto]">
+                        <div class="space-y-6">
+                            <div class="space-y-4">
+                                <p class="section-label">Boxed heat, no filler</p>
+                                <h1 class="font-display text-6xl uppercase leading-[0.88] tracking-[0.06em] text-stone-50 sm:text-8xl">
+                                    Four sauces.<br>Three slots.<br>One tasty box.
+                                </h1>
+                                <p class="max-w-2xl text-lg leading-8 text-stone-300">
+                                    Build a box from four 125ml bottles:
+                                    <strong class="text-stone-100"> Coder's Hot Classic</strong>,
+                                    <strong class="text-stone-100"> Coder's Hot Mango</strong>,
+                                    <strong class="text-stone-100"> Coder's Hot Honey</strong>,
+                                    and <strong class="text-stone-100">Coder's Hot Chocolate</strong>.
+                                    Delivered anywhere in the UK for a flat £19.99.
+                                </p>
+                            </div>
+
+                            <p v-if="checkoutError" class="rounded-2xl border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+                                {{ checkoutError }}
+                            </p>
+                        </div>
+
+                        <div class="grid content-start gap-4 sm:grid-cols-3 lg:w-[480px] lg:grid-cols-1">
+                            <article
+                                v-for="item in credibility"
+                                :key="item.title"
+                                class="stat-card"
+                            >
+                                <p class="text-xs uppercase tracking-[0.28em] text-orange-300">
+                                    {{ item.title }}
+                                </p>
+                                <p class="mt-3 text-sm leading-7 text-stone-300">
+                                    {{ item.copy }}
+                                </p>
+                            </article>
                         </div>
                     </div>
                 </section>
@@ -795,12 +790,27 @@ const startClubSilverCheckout = async () => {
     transition: box-shadow 0.4s ease;
 }
 
-/* ─── Reel button hover gradient (gradient swap not doable in Tailwind) ── */
+/* ─── Reel button green pulse ─────────────────────────────────── */
+@keyframes reel-btn-pulse {
+    0%, 100% {
+        background: linear-gradient(135deg, rgba(34,197,94,0.18), rgba(22,163,74,0.08));
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 0 8px rgba(34,197,94,0.3);
+        border-color: rgba(34,197,94,0.35);
+    }
+    50% {
+        background: linear-gradient(135deg, rgba(34,197,94,0.35), rgba(22,163,74,0.18));
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 18px rgba(34,197,94,0.6), 0 0 32px rgba(34,197,94,0.2);
+        border-color: rgba(34,197,94,0.65);
+    }
+}
+.reel-btn { animation: reel-btn-pulse 2s ease-in-out infinite; color: #86efac; }
+.reel-btn:disabled { animation: none; }
 .reel-btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, rgba(249,115,22,0.25), rgba(249,115,22,0.08));
-    border-color: rgba(249, 115, 22, 0.4);
-    color: #fb923c;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 0 12px rgba(249,115,22,0.2);
+    background: linear-gradient(135deg, rgba(34,197,94,0.45), rgba(22,163,74,0.25));
+    border-color: rgba(34,197,94,0.8);
+    color: #bbf7d0;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px rgba(34,197,94,0.5);
+    animation: none;
 }
 
 /* ─── Spin random button hover ───────────────────────────────── */
