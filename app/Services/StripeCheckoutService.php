@@ -27,12 +27,19 @@ class StripeCheckoutService
             'shipping_address_collection' => [
                 'allowed_countries' => $this->allowedCountries(),
             ],
-            'shipping_options' => $this->shippingOptionsFor($user),
+            'shipping_options' => $this->shippingOptionsFor($user, $order),
             'allow_promotion_codes' => true,
             'success_url' => route('checkout.success', ['order' => $order->public_id]).'&session_id={CHECKOUT_SESSION_ID}',
             'cancel_url' => route('checkout.cancel', ['order' => $order->public_id]),
             ...$this->paymentCustomerPayload($user, $order->customer_email),
             'line_items' => array_map(function (array $item): array {
+                if (str_starts_with((string) $item['stripe_product_id'], 'price_')) {
+                    return [
+                        'price' => $item['stripe_product_id'],
+                        'quantity' => $item['quantity'],
+                    ];
+                }
+
                 return [
                     'price_data' => [
                         'currency' => strtolower((string) ($item['currency'] ?? config('services.stripe.currency', 'gbp'))),
@@ -140,12 +147,14 @@ class StripeCheckoutService
     /**
      * @return array<int, array<string, string>>
      */
-    protected function shippingOptionsFor(?User $user): array
+    protected function shippingOptionsFor(?User $user, Order $order): array
     {
-        if ($user?->hasActiveClubSilver()) {
+        $isFullBox = $order->product_slug === 'coders-hot-sauce-box';
+
+        if ($user?->hasActiveClubSilver() || $isFullBox) {
             return [[
                 'shipping_rate_data' => [
-                    'display_name' => 'Club Silver UK delivery',
+                    'display_name' => $isFullBox ? 'Included UK Delivery' : 'Club Silver UK delivery',
                     'type' => 'fixed_amount',
                     'fixed_amount' => [
                         'amount' => 0,
@@ -181,10 +190,15 @@ class StripeCheckoutService
             ];
         }
 
-        return [
+        $payload = [
             'customer_creation' => 'always',
-            'customer_email' => $fallbackEmail,
         ];
+
+        if (filled($fallbackEmail)) {
+            $payload['customer_email'] = $fallbackEmail;
+        }
+
+        return $payload;
     }
 
     /**

@@ -10,7 +10,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Throwable;
@@ -29,17 +28,19 @@ class CheckoutController extends Controller
         $totalQuantity = collect($boxItems)->sum('quantity');
         $subtotalAmount = collect($boxItems)->sum('line_total_amount');
 
-        $order = DB::transaction(function () use ($request, $boxItems, $totalQuantity, $subtotalAmount): Order {
+        $order = DB::transaction(function () use ($request, $boxItems, $totalQuantity): Order {
+            $isFullBox = $totalQuantity === ProductCatalog::boxLimit();
+
             $order = Order::create([
                 'user_id' => $request->user()?->id,
                 'status' => Order::STATUS_INITIATED,
-                'product_slug' => 'custom-box',
+                'product_slug' => $isFullBox ? 'coders-hot-sauce-box' : 'partial-box',
                 'product_name' => ProductCatalog::boxName(),
-                'stripe_price_id' => 'box-builder',
-                'quantity' => $totalQuantity,
-                'unit_amount' => (int) floor($subtotalAmount / $totalQuantity),
-                'subtotal_amount' => $subtotalAmount,
-                'total_amount' => $subtotalAmount,
+                'stripe_price_id' => $isFullBox ? ProductCatalog::stripeBoxPriceId() : 'box-builder',
+                'quantity' => 1,
+                'unit_amount' => $isFullBox ? ProductCatalog::boxUnitAmount() : collect($boxItems)->sum('line_total_amount'),
+                'subtotal_amount' => $isFullBox ? ProductCatalog::boxUnitAmount() : collect($boxItems)->sum('line_total_amount'),
+                'total_amount' => $isFullBox ? ProductCatalog::boxUnitAmount() : collect($boxItems)->sum('line_total_amount'),
                 'currency' => config('services.stripe.currency', 'gbp'),
                 'customer_email' => $request->user()?->email,
             ]);
@@ -56,8 +57,21 @@ class CheckoutController extends Controller
             return $order->load('items');
         });
 
+        $stripeItems = [];
+
+        if ($totalQuantity === ProductCatalog::boxLimit()) {
+            $stripeItems[] = [
+                'stripe_product_id' => ProductCatalog::stripeBoxPriceId(),
+                'unit_amount' => ProductCatalog::boxUnitAmount(),
+                'quantity' => 1,
+                'currency' => $order->currency,
+            ];
+        } else {
+            $stripeItems = $boxItems;
+        }
+
         try {
-            $session = $stripe->createCheckoutSession($order, $boxItems);
+            $session = $stripe->createCheckoutSession($order, $stripeItems);
         } catch (Throwable $exception) {
             $order->update(['status' => Order::STATUS_CHECKOUT_FAILED]);
 

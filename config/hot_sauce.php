@@ -3,6 +3,8 @@
 return [
     'box_limit' => 3,
     'box_name' => "Coder's Hot Sauce Box",
+    'box_unit_amount' => 1999,
+    'stripe_box_price_id' => env('STRIPE_BOX_PRICE_ID', 'price_default_box'),
     'products' => [
         [
             'slug' => 'coders-hot-classic',
@@ -11,9 +13,9 @@ return [
             'description' => 'The core bottle. Bright, savory, and balanced enough to live on every desk-side Friday slice.',
             'heat_label' => 'Classic Heat',
             'heat_level' => 3,
-            'price' => '£14',
+            'price' => 6,
             'currency' => 'gbp',
-            'unit_amount' => 1400,
+            'unit_amount' => 1,
             'size_label' => '125ml bottle',
             'stripe_product_id' => env('STRIPE_CODERS_CLASSIC_HOT'),
             'accent' => '#f97316',
@@ -26,9 +28,9 @@ return [
             'description' => 'Built for smoky crust and pepperoni edges. Sweet enough to round the heat, sharp enough to stay professional.',
             'heat_label' => 'Mango Lift',
             'heat_level' => 2,
-            'price' => '£15',
+            'price' => 6,
             'currency' => 'gbp',
-            'unit_amount' => 1500,
+            'unit_amount' => 1,
             'size_label' => '125ml bottle',
             'stripe_product_id' => env('STRIPE_CODERS_MANGO_HOT'),
             'accent' => '#fb923c',
@@ -41,9 +43,9 @@ return [
             'description' => 'Sticky in the right way. Made for crust drizzles, cheese slices, and late-night pizza that needs a sharper finish.',
             'heat_label' => 'Honey Burn',
             'heat_level' => 4,
-            'price' => '£16',
+            'price' => 6,
             'currency' => 'gbp',
-            'unit_amount' => 1600,
+            'unit_amount' => 1,
             'size_label' => '125ml bottle',
             'stripe_product_id' => env('STRIPE_CODERS_HONEY_HOT'),
             'accent' => '#facc15',
@@ -56,7 +58,7 @@ return [
             'description' => 'The moodier bottle. Rich, smoky, and sharp enough to work with sausage pizza and charred crust.',
             'heat_label' => 'Midnight Burn',
             'heat_level' => 5,
-            'price' => '£17',
+            'price' => 6,
             'currency' => 'gbp',
             'unit_amount' => 1700,
             'size_label' => '125ml bottle',
@@ -64,5 +66,8 @@ return [
             'accent' => '#f87171',
             'glow' => 'rgba(248, 113, 113, 0.34)',
         ],
+    ],
+    'merch_products' => [
+        // Provisions for branded merch details to follow
     ],
 ];

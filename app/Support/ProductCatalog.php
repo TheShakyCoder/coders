@@ -17,6 +17,16 @@ class ProductCatalog
         return (string) config('hot_sauce.box_name', "Coder's Hot Sauce Box");
     }
 
+    public static function boxUnitAmount(): int
+    {
+        return (int) config('hot_sauce.box_unit_amount', 1999);
+    }
+
+    public static function stripeBoxPriceId(): string
+    {
+        return (string) config('hot_sauce.stripe_box_price_id', '');
+    }
+
     /**
      * @return array<int, array<string, mixed>>
      */
@@ -25,6 +35,14 @@ class ProductCatalog
         return array_map(function (array $product): array {
             return Arr::except($product, ['stripe_product_id']);
         }, config('hot_sauce.products', []));
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public static function merch(): array
+    {
+        return config('hot_sauce.merch_products', []);
     }
 
     /**
@@ -83,6 +101,16 @@ class ProductCatalog
             throw ValidationException::withMessages([
                 'items' => 'Choose between 1 and '.self::boxLimit().' bottles per box.',
             ]);
+        }
+
+        if ($totalQuantity === self::boxLimit()) {
+            return array_map(function (array $item): array {
+                return [
+                    ...$item,
+                    'unit_amount' => (int) floor(self::boxUnitAmount() / self::boxLimit()),
+                    'line_total_amount' => (int) floor(self::boxUnitAmount() / self::boxLimit()) * $item['quantity'],
+                ];
+            }, $normalizedItems->all());
         }
 
         return $normalizedItems->all();

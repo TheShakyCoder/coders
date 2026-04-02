@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\ProductRequest;
 use App\Models\Product;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ProductController extends Controller
@@ -15,6 +15,7 @@ class ProductController extends Controller
     public function index()
     {
         $products = Product::all();
+
         return Inertia::render('Admin/Products/Index', [
             'products' => $products,
         ]);
@@ -25,30 +26,18 @@ class ProductController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('Admin/Products/Create');
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(ProductRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'unit' => 'required|string|max:50',
-            'price_amount' => 'required_if:can_sell,1|numeric|min:0',
-            'can_sell' => 'boolean',
-            'can_build_with' => 'boolean',
-            'can_be_built' => 'boolean',
-            'stripe_product_id' => 'nullable|string|max:255',
-            'class' => 'nullable|string|max:255',
-        ]);
+        Product::create($request->validated());
 
-        Product::create($validated);
-
-        return redirect()->route('admin.products.index')->with('success', 'Product created successfully.');
-
+        return redirect()->route('admin.products.index')
+            ->with('success', 'Product created successfully.');
     }
 
     /**
@@ -56,7 +45,7 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        //
+        return redirect()->route('admin.products.edit', $product);
     }
 
     /**
@@ -64,15 +53,20 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
-        //
+        return Inertia::render('Admin/Products/Edit', [
+            'product' => $product,
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Product $product)
+    public function update(ProductRequest $request, Product $product)
     {
-        //
+        $product->update($request->validated());
+
+        return redirect()->route('admin.products.index')
+            ->with('success', 'Product updated successfully.');
     }
 
     /**
@@ -80,6 +74,9 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        //
+        $product->delete();
+
+        return redirect()->route('admin.products.index')
+            ->with('success', 'Product deleted successfully.');
     }
 }

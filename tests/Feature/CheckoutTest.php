@@ -80,18 +80,12 @@ it('creates a checkout session and guest order for a custom box', function () {
     $stripe = \Mockery::mock(StripeCheckoutService::class);
     $stripe->shouldReceive('createCheckoutSession')
         ->once()
-        ->withArgs(function (Order $order, array $items): bool {
-            return $order->product_slug === 'custom-box'
-                && $order->quantity === 3
-                && $order->currency === 'gbp'
-                && count($items) === 2
-                && $items[0]['slug'] === 'coders-hot-classic'
-                && $items[0]['quantity'] === 2
-                && $items[0]['stripe_product_id'] === 'prod_classic'
-                && $items[1]['slug'] === 'coders-hot-honey'
-                && $items[1]['quantity'] === 1
-                && $items[1]['stripe_product_id'] === 'prod_honey';
-        })
+        ->with(\Mockery::type(Order::class), \Mockery::on(function (array $items): bool {
+            return count($items) === 1
+                && $items[0]['stripe_product_id'] === (config('hot_sauce.stripe_box_price_id') ?: 'price_default_box')
+                && $items[0]['unit_amount'] === 1999
+                && $items[0]['quantity'] === 1;
+        }))
         ->andReturn((object) [
             'id' => 'cs_test_123',
             'url' => 'https://checkout.stripe.test/cs_test_123',
@@ -116,10 +110,10 @@ it('creates a checkout session and guest order for a custom box', function () {
 
     expect($order->status)->toBe(Order::STATUS_CHECKOUT_CREATED)
         ->and($order->user_id)->toBeNull()
-        ->and($order->product_slug)->toBe('custom-box')
+        ->and($order->product_slug)->toBe('coders-hot-sauce-box')
         ->and($order->product_name)->toBe("Coder's Hot Sauce Box")
-        ->and($order->quantity)->toBe(3)
-        ->and($order->subtotal_amount)->toBe(4400)
+        ->and($order->quantity)->toBe(1)
+        ->and($order->subtotal_amount)->toBe(1999)
         ->and($order->currency)->toBe('gbp')
         ->and($order->stripe_checkout_session_id)->toBe('cs_test_123')
         ->and($order->items)->toHaveCount(2)
@@ -155,6 +149,7 @@ it('associates authenticated users to created box orders', function () {
 
     expect($order->user_id)->toBe($user->id)
         ->and($order->customer_email)->toBe($user->email)
+        ->and($order->product_slug)->toBe('partial-box')
         ->and($order->quantity)->toBe(1)
         ->and($order->currency)->toBe('gbp');
 });

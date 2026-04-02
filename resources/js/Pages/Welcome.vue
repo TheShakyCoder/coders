@@ -45,12 +45,12 @@ const credibility = [
         copy: 'Classic, Mango, Hot Honey, and the darker Chocolate bottle. All 125ml, all built for pizza.',
     },
     {
-        title: '£4 UK Delivery',
-        copy: 'One flat UK delivery charge per order, regardless of how the box mix is built.',
+        title: '£19.99 Delivered',
+        copy: 'One flat price for the full box, delivered anywhere in the UK. No extra shipping math.',
     },
     {
-        title: 'Club Silver',
-        copy: 'Buy the Stripe subscription and UK delivery drops to free for a month while the membership is active.',
+        title: 'Branded Merch',
+        copy: 'Coming soon. Wear the heat while you shop the box. Provisions are being made.',
     },
 ];
 
@@ -73,12 +73,15 @@ const totalBottles = computed(() =>
     Object.values(counts.value).reduce((total, quantity) => total + quantity, 0),
 );
 
-const subtotal = computed(() =>
-    props.products.reduce(
+const subtotal = computed(() => {
+    if (totalBottles.value === props.boxLimit) {
+        return 1999;
+    }
+    return props.products.reduce(
         (sum, product) => sum + (counts.value[product.slug] ?? 0) * Number(product.unit_amount ?? 0),
         0,
-    ),
-);
+    );
+});
 
 const selectedSlots = computed(() =>
     props.products.flatMap((product) =>
@@ -112,9 +115,9 @@ const checkoutLabel = computed(() => {
 });
 
 const deliveryPreview = computed(() =>
-    clubSilverActive.value
-        ? 'Free UK delivery with Club Silver'
-        : 'Flat £4 UK delivery added at checkout',
+    totalBottles.value === props.boxLimit
+        ? 'UK delivery included in the £19.99 price'
+        : 'Build a full box to unlock the £19.99 delivered price',
 );
 
 const formatMoney = (amount) =>
@@ -249,8 +252,8 @@ const startClubSilverCheckout = async () => {
                     <div class="space-y-8">
                         <div class="space-y-4">
                             <p class="section-label">Boxed heat, no filler</p>
-                            <h1 class="max-w-4xl font-display text-7xl uppercase leading-[0.88] tracking-[0.06em] text-stone-50 sm:text-8xl lg:text-[8.5rem]">
-                                Four sauces. Three slots. One sharp box.
+                            <h1 class="max-w-4xl font-display text-xl uppercase leading-[0.88] tracking-[0.06em] text-stone-50 sm:text-8xl">
+                                Four sauces.<br>Three slots.<br>One tasty box.
                             </h1>
                             <p class="max-w-2xl text-lg leading-8 text-stone-300 sm:text-xl">
                                 Build a box from four 125ml bottles:
@@ -258,13 +261,12 @@ const startClubSilverCheckout = async () => {
                                 <strong class="text-stone-100"> Coder's Hot Mango</strong>,
                                 <strong class="text-stone-100"> Coder's Hot Honey</strong>,
                                 and <strong class="text-stone-100">Coder's Hot Chocolate</strong>.
-                                UK delivery is a flat £4 per order, or free for active Club Silver members.
+                                Delivered anywhere in the UK for a flat £19.99.
                             </p>
                         </div>
 
                         <div class="flex flex-col gap-4 sm:flex-row">
                             <a href="#builder" class="fire-button text-center">Build Your Box</a>
-                            <a href="#club-silver" class="ghost-button text-center">See Club Silver</a>
                         </div>
 
                         <p v-if="checkoutError" class="rounded-2xl border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
@@ -301,7 +303,7 @@ const startClubSilverCheckout = async () => {
                         </div>
 
                         <p class="mt-6 max-w-md text-base leading-8 text-stone-300">
-                            Choose up to three bottles. Delivery stays flat at £4 for the order, unless your account has active Club Silver.
+                            Choose three bottles to fill the box. Delivered anywhere in the UK for £19.99 total.
                         </p>
 
                         <div class="mt-8 grid gap-4 sm:grid-cols-3">
@@ -358,8 +360,8 @@ const startClubSilverCheckout = async () => {
                     <div class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                         <div>
                             <p class="section-label">Bottles</p>
-                            <h2 class="mt-3 font-display text-5xl uppercase tracking-[0.08em] text-stone-50 sm:text-6xl">
-                                Four 125ml bottles. Three places in the box.
+                             <h2 class="mt-3 font-display text-5xl uppercase tracking-[0.08em] text-stone-50 sm:text-6xl">
+                                Four 125ml bottles. One £19.99 box.
                             </h2>
                         </div>
                         <p class="max-w-xl text-base leading-7 text-stone-400">
@@ -380,8 +382,8 @@ const startClubSilverCheckout = async () => {
                             <div class="relative z-10 flex h-full flex-col">
                                 <div class="flex items-start justify-between gap-4">
                                     <p class="section-label">{{ product.size_label }}</p>
-                                    <span class="chip border-white/10 bg-white/5 text-stone-300">
-                                        {{ product.price }}
+                                     <span class="chip border-white/10 bg-white/5 text-stone-300">
+                                        Box Item
                                     </span>
                                 </div>
 
@@ -435,83 +437,18 @@ const startClubSilverCheckout = async () => {
                     </div>
                 </section>
 
-                <section id="club-silver" class="grid gap-8 pb-20 lg:grid-cols-[0.95fr_1.05fr]">
-                    <div class="glow-panel p-8 sm:p-10">
-                        <p class="section-label">Club Silver</p>
+                <section id="merch" class="pb-20">
+                    <div class="glow-panel p-8 sm:p-10 border-dashed border-2 border-orange-500/20">
+                        <p class="section-label">Provision</p>
                         <h2 class="mt-4 font-display text-5xl uppercase tracking-[0.08em] text-stone-50">
-                            Free UK delivery for a month.
+                            Branded Merch.
                         </h2>
                         <p class="mt-6 text-base leading-8 text-stone-300">
-                            Club Silver is the delivery unlock. Purchase the Stripe subscription and UK delivery becomes free on your orders for the next month while the membership stays active.
+                            Provisions are being made to sell branded apparel and gear. Details are currently being finalized to ensure every thread meets the same standard as the sauce.
                         </p>
-
-                        <div class="mt-8 space-y-4">
-                            <div class="flex items-start gap-4 rounded-[1.4rem] border border-white/10 bg-black/25 px-5 py-4">
-                                <span class="slot-badge">1</span>
-                                <p class="text-sm leading-7 text-stone-300">Standard buyers pay a flat £4 UK delivery charge per order.</p>
-                            </div>
-                            <div class="flex items-start gap-4 rounded-[1.4rem] border border-white/10 bg-black/25 px-5 py-4">
-                                <span class="slot-badge">2</span>
-                                <p class="text-sm leading-7 text-stone-300">Club Silver members get free UK delivery while the subscription window is active.</p>
-                            </div>
-                            <div class="flex items-start gap-4 rounded-[1.4rem] border border-white/10 bg-black/25 px-5 py-4">
-                                <span class="slot-badge">3</span>
-                                <p class="text-sm leading-7 text-stone-300">Membership is attached to your signed-in account, so delivery perks follow you through checkout.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="glow-panel p-8 sm:p-10">
-                        <div class="flex items-start justify-between gap-4">
-                            <div>
-                                <p class="section-label">Member status</p>
-                                <h3 class="mt-4 font-display text-5xl uppercase tracking-[0.08em] text-stone-50">
-                                    {{ clubSilverActive ? 'Active' : 'Not active' }}
-                                </h3>
-                            </div>
-                            <span class="chip bg-white/5 text-stone-200">
-                                {{ clubSilverActive ? 'Free UK delivery live' : '£4 delivery applies' }}
-                            </span>
-                        </div>
-
-                        <p class="mt-6 text-base leading-8 text-stone-300">
-                            {{ clubSilverActive
-                                ? `Your current Club Silver window runs until ${formatDate(clubSilverEndsAt)}.`
-                                : 'Join Club Silver from a signed-in account to switch UK delivery to free for a month.' }}
-                        </p>
-
-                        <p v-if="clubSilverError" class="mt-6 rounded-2xl border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
-                            {{ clubSilverError }}
-                        </p>
-
-                        <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-                            <button
-                                v-if="currentUser && !clubSilverActive"
-                                type="button"
-                                class="fire-button"
-                                :disabled="loadingClubSilver"
-                                @click="startClubSilverCheckout"
-                            >
-                                {{ loadingClubSilver ? 'Opening Membership Checkout...' : 'Buy Club Silver' }}
-                            </button>
-                            <Link
-                                v-else-if="!currentUser && canLogin"
-                                :href="route('login')"
-                                class="fire-button text-center"
-                            >
-                                Sign In To Join
-                            </Link>
-                            <span v-else class="ghost-button">
-                                Club Silver already active
-                            </span>
-
-                            <Link
-                                v-if="!currentUser && canRegister"
-                                :href="route('register')"
-                                class="ghost-button text-center"
-                            >
-                                Create account
-                            </Link>
+                        <div class="mt-8 flex items-center gap-4 text-orange-300/50">
+                            <span class="text-sm uppercase tracking-[0.2em]">Coming Soon</span>
+                            <div class="h-px flex-1 bg-gradient-to-r from-orange-500/20 to-transparent" />
                         </div>
                     </div>
                 </section>

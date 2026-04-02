@@ -23,7 +23,7 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - pestphp/pest (PEST) - v4
 - phpunit/phpunit (PHPUNIT) - v12
 - @inertiajs/vue3 (INERTIA_VUE) - v2
-- tailwindcss (TAILWINDCSS) - v3
+- tailwindcss (TAILWINDCSS) - v4
 - vue (VUE) - v3
 
 ## Skills Activation
@@ -186,4 +186,8 @@ This project has domain-specific skills available. You MUST activate the relevan
 Vue components must have a single root element.
 - IMPORTANT: Activate `inertia-vue-development` when working with Inertia Vue client-side patterns.
 
+# Command Line
+
+- Always prefix npmand php commands with `ddev exec` to run artisan commands.
+- Assume `ddev exec npm run dev` is running.
 </laravel-boost-guidelines>
