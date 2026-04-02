@@ -296,24 +296,9 @@ const startClubSilverCheckout = async () => {
             </header>
 
             <main class="flex-1">
-                <section class="pb-20 pt-14 lg:pt-20">
+                <section class="pb-20 pt-4 lg:pt-6">
                     <!-- Slot Machine Builder — full width -->
                     <div id="builder" class="hero-panel">
-                        <div class="flex items-start justify-between gap-4">
-                            <div>
-                                <p class="section-label">Slot machine</p>
-                                <h2 class="mt-4 font-display text-5xl uppercase tracking-[0.08em] text-stone-50">
-                                    Coder's Slot Machine
-                                </h2>
-                            </div>
-                            <span class="chip bg-orange-500/15 text-orange-200">
-                                {{ totalBottles }}/{{ boxLimit }} filled
-                            </span>
-                        </div>
-
-                        <p class="mt-6 max-w-md text-base leading-8 text-stone-300">
-                            Spin each reel to pick your sauce. Or let the machine choose.
-                        </p>
 
                         <!-- Machine outer shell -->
                         <div
