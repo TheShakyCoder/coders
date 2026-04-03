@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
-#[Fillable(['name', 'description', 'unit', 'price_amount', 'can_sell', 'can_build_with', 'can_be_built', 'stripe_product_id', 'class'])]
+#[Fillable(['slug', 'name', 'tagline', 'description', 'heat_label', 'heat_level', 'taste_label', 'size_label', 'accent', 'glow', 'image', 'unit', 'unit_amount', 'price_amount', 'can_sell', 'can_build_with', 'can_be_built', 'stripe_product_id', 'class'])]
 class Product extends Model
 {
     use HasFactory, HasUuids, SoftDeletes;
