@@ -205,17 +205,17 @@ const startCheckout = async () => {
         <div class="absolute right-0 top-24 h-80 w-80 rounded-full bg-orange-500/10 blur-3xl" />
         <div class="absolute left-0 top-[30rem] h-96 w-96 rounded-full bg-red-500/10 blur-3xl" />
 
-        <div class="relative mx-auto flex min-h-screen max-w-7xl flex-col px-0 pb-16 sm:pt-6 lg:px-8">
-            <header class="glow-panel rounded-none sm:rounded-[2rem] flex items-center justify-between px-5 py-4">
+        <div class="relative mx-auto flex min-h-screen max-w-7xl flex-col px-0 pb-16 lg:pt-6 lg:px-8">
+            <header class="glow-panel rounded-none lg:rounded-[2rem] flex items-center justify-between px-5 py-4">
                 <a href="#" class="flex items-center gap-4">
                     <div class="flex h-12 w-12 items-center justify-center rounded-2xl text-2xl font-display tracking-[0.18em] text-orange-300">
                         <Logo />
                     </div>
                     <div>
-                        <p class="font-display text-3xl uppercase tracking-[0.16em] text-stone-50">
+                        <p class="font-display text-2xl lg:text-3xl uppercase tracking-[0.16em] text-stone-50">
                             Coder's Hot Sauce
                         </p>
-                        <p class="text-xs uppercase tracking-[0.28em] text-stone-400">
+                        <p class="text-xs uppercase tracking-none lg:tracking-[0.28em] text-stone-400">
                             Fuel for working techies
                         </p>
                     </div>
@@ -247,21 +247,26 @@ const startCheckout = async () => {
                     <div class="grid items-start gap-10 lg:grid-cols-2">
                         <!-- Left: hero copy + credibility -->
                         <div class="space-y-8">
-                            <div class="space-y-4 px-5 sm:px-0">
-                                <p class="section-label">Boxed heat, no filler</p>
-                                <h1 class="font-display text-5xl uppercase leading-[0.88] tracking-[0.06em] text-stone-50 sm:text-8xl">
-                                    {{ numberToWord(products.length) }} sauces.<br>Three slots.<br>One great box.
-                                </h1>
-                                <p class="max-w-2xl text-lg leading-8 text-stone-300">
-                                    Build a box from {{ numberToWord(products.length) }} 125ml bottles including
-                                    <strong class="text-stone-100"> Coder's Hot Mango</strong>,
-                                    <strong class="text-stone-100"> Coder's Hot Honey</strong>,
-                                    and <strong class="text-stone-100">Coder's Hot Chocolate</strong>.
-                                    Delivered anywhere in the UK for a flat fee of £19.99.
-                                </p>
-                                <Link href="#builder" class="fire-button px-4 py-2">
-                                    Build a box
-                                </Link>
+                            <div class="flex lg:flex-col gap-4 px-5 lg:px-0">
+                                <div class="w-full">
+                                    <p class="section-label">Boxed heat, no filler</p>
+                                    <h1 class="font-display text-5xl uppercase leading-[0.88] tracking-[0.06em] text-stone-50 sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl">
+                                        {{ numberToWord(products.length) }} sauces.<br>Three slots.<br>One great box.
+                                    </h1>
+                                </div>
+                                
+                                <div>
+                                    <p class="max-w-2xl text-lg leading-8 text-stone-300">
+                                        Build a box from {{ numberToWord(products.length) }} 125ml bottles including
+                                        <strong class="text-stone-100"> Coder's Hot Mango</strong>,
+                                        <strong class="text-stone-100"> Coder's Hot Honey</strong>,
+                                        and <strong class="text-stone-100">Coder's Hot Chocolate</strong>.
+                                        Delivered anywhere in the UK for a flat fee of £19.99.
+                                    </p>
+                                    <Link href="#builder" class="fire-button px-4 py-2 mt-4">
+                                        Buy a box
+                                    </Link>
+                                </div>
                             </div>
 
                             <p v-if="checkoutError" class="rounded-2xl border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
@@ -283,7 +288,7 @@ const startCheckout = async () => {
                                 </article>
                             </div>
                             
-                            <div class="px-5 sm:px-0">
+                            <div class="px-5 lg:px-0">
 
                                 <h3 class="text-2xl font-bold text-orange-300">All our sauces are</h3>
                                 <ul class="list-disc list-inside span-2 text-lg">

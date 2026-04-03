@@ -294,7 +294,7 @@ const remainingSlots = computed(() => props.boxLimit - totalBottles.value);
                                 :disabled="isSpinning" @click="spinDown(i)" aria-label="Next sauce">▼</button>
 
                             <!-- Number plate + reel labels -->
-                            <div class="flex h-20 flex-col items-center gap-1 w-20 overflow-hidden">
+                            <div class="flex h-20 flex-col items-center gap-1 w-24 overflow-hidden">
                                 <div
                                     class="flex h-[22px] w-[22px] items-center justify-center rounded-full border border-white/[0.08] bg-black/50 font-display text-[0.6rem] tracking-[0.05em] text-white/50">
                                     {{ i + 1 }}
