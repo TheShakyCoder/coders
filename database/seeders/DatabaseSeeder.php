@@ -20,12 +20,14 @@ class DatabaseSeeder extends Seeder
 
         // User::factory(10)->create();
 
-        User::create([
-            'name' => 'Fig Support',
-            'email' => 'support@fig.limited',
-            'password' => Hash::make(config('app.admin.password')),
-            'email_verified_at' => now(),
-            'is_admin' => true,
-        ]);
+        User::updateOrCreate(
+            ['email' => 'support@fig.limited'],
+            [
+                'name' => 'Fig Support',
+                'password' => Hash::make(config('app.admin.password')),
+                'email_verified_at' => now(),
+                'is_admin' => true,
+            ]
+        );
     }
 }
