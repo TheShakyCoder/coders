@@ -215,6 +215,17 @@ const remainingSlots = computed(() => props.boxLimit - totalBottles.value);
                 </div>
             </div>
 
+            <!-- Random spin button -->
+            <div
+                class="flex items-center justify-center border-t border-white/[0.04] bg-gradient-to-b from-black/20 to-black/50 px-4 py-3">
+                <button type="button"
+                    class="spin-random-btn h-12 text-xl flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-orange-500/35 bg-gradient-to-br from-orange-500/[0.18] to-red-600/[0.08] px-6 py-[0.65rem] font-display uppercase tracking-[0.22em] text-orange-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_0_16px_rgba(249,115,22,0.1)] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
+                    :disabled="isSpinning" @click="spinRandom">
+                    <span class="text-[0.9rem]">⚡</span>
+                    {{ isSpinning ? 'Spinning…' : 'Spin Random' }}
+                </button>
+            </div>
+
             <!-- Slot progress dots -->
             <div class="flex items-center justify-center gap-2 border-b border-white/[0.03] bg-black/25 px-4 py-2">
                 <div v-for="j in boxLimit" :key="j"
@@ -318,16 +329,7 @@ const remainingSlots = computed(() => props.boxLimit - totalBottles.value);
                     class="hidden sm:flex w-[10px] shrink-0 rounded-sm bg-gradient-to-b from-white/[0.06] via-white/[0.02] to-black/20" />
             </div>
 
-            <!-- Random spin button -->
-            <div
-                class="flex items-center justify-center border-t border-white/[0.04] bg-gradient-to-b from-black/20 to-black/50 px-4 py-3">
-                <button type="button"
-                    class="spin-random-btn h-12 text-xl flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-orange-500/35 bg-gradient-to-br from-orange-500/[0.18] to-red-600/[0.08] px-6 py-[0.65rem] font-display uppercase tracking-[0.22em] text-orange-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_0_16px_rgba(249,115,22,0.1)] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
-                    :disabled="isSpinning" @click="spinRandom">
-                    <span class="text-[0.9rem]">⚡</span>
-                    {{ isSpinning ? 'Spinning…' : 'Spin Random' }}
-                </button>
-            </div>
+
         </div>
 
         <!-- Summary -->

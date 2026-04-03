@@ -90,7 +90,7 @@
     }
 
     .product-card {
-        @apply relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 backdrop-blur-md transition duration-300;
+        @apply relative overflow-hidden rounded-none sm:rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 backdrop-blur-md transition duration-300;
         box-shadow:
             0 30px 80px rgba(0, 0, 0, 0.35),
             0 0 40px var(--card-glow),

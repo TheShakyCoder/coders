@@ -1,5 +1,6 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
+import { formatDate } from '@/Composables/formatting';
 
 const props = defineProps({
     member: {
@@ -7,18 +8,6 @@ const props = defineProps({
         default: null,
     },
 });
-
-const formatDate = (value) => {
-    if (!value) {
-        return 'Pending activation';
-    }
-
-    return new Intl.DateTimeFormat('en-GB', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-    }).format(new Date(value));
-};
 </script>
 
 <template>

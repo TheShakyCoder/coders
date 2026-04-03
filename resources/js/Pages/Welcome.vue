@@ -3,6 +3,7 @@ import { Head, Link, usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 import { computed, onMounted, ref, watch } from 'vue';
 import SlotMachine from '@/Components/SlotMachine.vue';
+import { numberToWord } from '@/Composables/formatting';
 
 const props = defineProps({
     canLogin: {
@@ -73,11 +74,6 @@ const randomBox = async () => {
     isSpinning.value = false;
 };
 
-const resetBox = () => {
-    if (isSpinning.value) return;
-    slotIndices.value = [0, 0, 0];
-};
-
 onMounted(() => {
     setTimeout(randomBox, 400);
 });
@@ -145,14 +141,24 @@ const testimonials = [
         role: 'Engineering Lead, Bristol',
     },
     {
-        quote: "Classic plus Hot Honey is the right two-bottle answer for every Friday deploy I have had this year.",
+        quote: "Hot Mango plus Hot Honey is the right two-bottle answer for every Friday deployment.",
         role: 'Product Designer, London',
     },
     {
-        quote: "Club Silver paying for its own delivery inside a month is exactly the kind of subscription math I respect.",
+        quote: "Pizza now has a 4th dimension.",
         role: 'Founder, Leeds',
     },
 ];
+
+const ourSauces = [
+    'free from soya',
+    'free from gluten',
+    'free from artificial colours',
+    'free from artificial flavours',
+    'free from artificial sweeteners',
+    'free from artificial preservatives',
+    'free from palm oil',
+]
 
 const checkoutLabel = computed(() => {
     if (loadingCheckout.value) return 'Opening Checkout...';
@@ -160,22 +166,7 @@ const checkoutLabel = computed(() => {
     return `Checkout ${totalBottles.value} Bottle${totalBottles.value === 1 ? '' : 's'}`;
 });
 
-const deliveryPreview = computed(() =>
-    totalBottles.value === props.boxLimit
-        ? 'UK delivery included in the £19.99 price'
-        : 'Build a full box to unlock the £19.99 delivered price',
-);
 
-
-
-const formatDate = (value) => {
-    if (!value) return 'Pending activation';
-    return new Intl.DateTimeFormat('en-GB', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-    }).format(new Date(value));
-};
 
 const heatScale = (level) => `${'●'.repeat(level)}${'○'.repeat(Math.max(0, 5 - level))}`;
 
@@ -200,22 +191,6 @@ const startCheckout = async () => {
             error.response?.data?.errors?.items?.[0] ??
             'Checkout failed. Confirm Stripe is configured and try again.';
         loadingCheckout.value = false;
-    }
-};
-
-const startClubSilverCheckout = async () => {
-    clubSilverError.value = '';
-    loadingClubSilver.value = true;
-
-    try {
-        const response = await axios.post(route('club-silver.store'));
-
-        window.location.href = response.data.checkout_url;
-    } catch (error) {
-        clubSilverError.value =
-            error.response?.data?.message ??
-            'Club Silver checkout failed. Confirm Stripe is configured and try again.';
-        loadingClubSilver.value = false;
     }
 };
 </script>
@@ -271,19 +246,21 @@ const startClubSilverCheckout = async () => {
                     <div class="grid items-start gap-10 lg:grid-cols-2">
                         <!-- Left: hero copy + credibility -->
                         <div class="space-y-8">
-                            <div class="space-y-4">
+                            <div class="space-y-4 px-5 sm:px-0">
                                 <p class="section-label">Boxed heat, no filler</p>
-                                <h1 class="font-display text-6xl uppercase leading-[0.88] tracking-[0.06em] text-stone-50 sm:text-8xl">
-                                    Four sauces.<br>Three slots.<br>One tasty box.
+                                <h1 class="font-display text-5xl uppercase leading-[0.88] tracking-[0.06em] text-stone-50 sm:text-8xl">
+                                    {{ numberToWord(products.length) }} sauces.<br>Three slots.<br>One great box.
                                 </h1>
                                 <p class="max-w-2xl text-lg leading-8 text-stone-300">
-                                    Build a box from four 125ml bottles:
-                                    <strong class="text-stone-100"> Coder's Hot Classic</strong>,
+                                    Build a box from {{ numberToWord(products.length) }} 125ml bottles including
                                     <strong class="text-stone-100"> Coder's Hot Mango</strong>,
                                     <strong class="text-stone-100"> Coder's Hot Honey</strong>,
                                     and <strong class="text-stone-100">Coder's Hot Chocolate</strong>.
-                                    Delivered anywhere in the UK for a flat £19.99.
+                                    Delivered anywhere in the UK for a flat fee of £19.99.
                                 </p>
+                                <Link href="#builder" class="fire-button px-4 py-2">
+                                    Build a box
+                                </Link>
                             </div>
 
                             <p v-if="checkoutError" class="rounded-2xl border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
@@ -292,7 +269,7 @@ const startClubSilverCheckout = async () => {
 
                             <div class="grid gap-4 sm:grid-cols-3">
                                 <article
-                                    v-for="item in credibility"
+                                v-for="item in credibility"
                                     :key="item.title"
                                     class="stat-card"
                                 >
@@ -304,23 +281,34 @@ const startClubSilverCheckout = async () => {
                                     </p>
                                 </article>
                             </div>
+                            
+                            <div class="px-5 sm:px-0">
+
+                                <h3 class="text-2xl font-bold text-orange-300">All our sauces are</h3>
+                                <ul class="list-disc list-inside span-2 text-lg">
+                                    <li v-for="sauce in ourSauces" :key="sauce">
+                                        {{ sauce }}
+                                    </li>
+                                </ul>
+                                
+                            </div>
                         </div>
 
                         <!-- Right: slot machine -->
-                        <SlotMachine :products="products" :box-limit="boxLimit" :checkout-label="checkoutLabel" :loading-checkout="loadingCheckout" @change="onSelectionChange" />
+                        <SlotMachine :products="products" :box-limit="boxLimit" :checkout-label="checkoutLabel" :loading-checkout="loadingCheckout" />
                     </div>
                 </section>
 
-                <section id="bottles" class="pb-20">
-                    <div class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                <section id="bottles" class="pb-12">
+                    <div class="mb-8 flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between px-5 sm:px-0">
                         <div>
-                            <p class="section-label">Bottles</p>
+                            <p class="section-label">Choose from</p>
                              <h2 class="mt-3 font-display text-5xl uppercase tracking-[0.08em] text-stone-50 sm:text-6xl">
-                                Four 125ml bottles. One £19.99 box.
+                                {{ numberToWord(products.length) }} 125ml bottles.<br>Buy One £19.99 Box.
                             </h2>
                         </div>
                         <p class="max-w-xl text-base leading-7 text-stone-400">
-                            Every bottle can be repeated. Build a safe office box, a sweet-and-hot split, or a heavier late-night mix with Chocolate in the rotation.
+                            Build a safe office box, a sweet-and-hot split, or a heavier late-night mix with Chocolate in the rotation.
                         </p>
                     </div>
 
@@ -374,7 +362,7 @@ const startClubSilverCheckout = async () => {
                 </section>
 
                 <section id="merch" class="pb-20">
-                    <div class="glow-panel rounded-[2rem] p-8 sm:p-10 border-dashed border-2 border-orange-500/20">
+                    <div class="glow-panel rounded-none sm:rounded-[2rem] p-8 sm:p-10 border-dashed border-2 border-orange-500/20">
                         <p class="section-label">Provision</p>
                         <h2 class="mt-4 font-display text-5xl uppercase tracking-[0.08em] text-stone-50">
                             Branded Merch.
@@ -390,10 +378,10 @@ const startClubSilverCheckout = async () => {
                 </section>
 
                 <section id="proof" class="pb-16">
-                    <div class="mb-8">
-                        <p class="section-label">Proof</p>
+                    <div class="mb-8 px-5 sm:px-0">
+                        <p class="section-label">Testimonials</p>
                         <h2 class="mt-3 font-display text-5xl uppercase tracking-[0.08em] text-stone-50 sm:text-6xl">
-                            Built for people who actually ship work.
+                            We would love to have.
                         </h2>
                     </div>
 
@@ -401,7 +389,7 @@ const startClubSilverCheckout = async () => {
                         <article
                             v-for="testimonial in testimonials"
                             :key="testimonial.role"
-                            class="glow-panel rounded-[2rem] p-8"
+                            class="glow-panel rounded-none sm:rounded-[2rem] p-8"
                         >
                             <p class="text-lg leading-8 text-stone-200">
                                 "{{ testimonial.quote }}"
@@ -414,7 +402,7 @@ const startClubSilverCheckout = async () => {
                 </section>
             </main>
 
-            <footer class="glow-panel rounded-[2rem] flex flex-col gap-6 px-6 py-8 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
+            <footer class="glow-panel rounded-none sm:rounded-[2rem] flex flex-col gap-6 px-6 py-8 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                     <p class="section-label">Final CTA</p>
                     <h2 class="mt-3 font-display text-4xl uppercase tracking-[0.08em] text-stone-50">
@@ -423,14 +411,6 @@ const startClubSilverCheckout = async () => {
                 </div>
                 <div class="flex flex-col gap-3 sm:flex-row">
                     <a href="#builder" class="ghost-button text-center">Open the builder</a>
-                    <button
-                        type="button"
-                        class="fire-button"
-                        :disabled="loadingCheckout || totalBottles === 0"
-                        @click="startCheckout"
-                    >
-                        {{ checkoutLabel }}
-                    </button>
                 </div>
             </footer>
         </div>
