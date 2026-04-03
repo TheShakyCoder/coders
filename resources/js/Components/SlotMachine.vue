@@ -9,7 +9,10 @@ const props = defineProps({
     loadingCheckout: { type: Boolean, default: false },
 });
 
-const emit = defineEmits(['change']);
+const emit = defineEmits(['change', 'start-checkout']);
+const startCheckout = () => {
+    emit('start-checkout');
+};
 
 // ─── Reel state ───────────────────────────────────────────────────────────────
 

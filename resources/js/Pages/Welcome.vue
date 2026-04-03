@@ -301,7 +301,7 @@ const startCheckout = async () => {
                         </div>
 
                         <!-- Right: slot machine -->
-                        <SlotMachine :products="products" :box-limit="boxLimit" :checkout-label="checkoutLabel" :loading-checkout="loadingCheckout" />
+                        <SlotMachine :products="products" :box-limit="boxLimit" :checkout-label="checkoutLabel" :loading-checkout="loadingCheckout" @start-checkout="startCheckout" />
                     </div>
                 </section>
 
