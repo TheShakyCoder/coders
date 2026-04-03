@@ -33,7 +33,7 @@ if [ -n "$DB_HOST" ]; then
 
     # Run migrations using array cache so it doesn't try to look up the cache table before it exists
     CACHE_STORE=array php artisan migrate --force
-    CACHE_STORE=array php artisan db:seed --force
+    # CACHE_STORE=array php artisan db:seed --force
 else
     echo "No DB_HOST provided. Skipping database wait and migrations."
 fi

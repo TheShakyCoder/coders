@@ -17,6 +17,7 @@ class ProductSeeder extends Seeder
                     'tagline'          => $data['tagline'] ?? null,
                     'description'      => $data['description'] ?? null,
                     'heat_label'       => $data['heat_label'] ?? null,
+                    'taste_label'      => $data['taste_label'] ?? null,
                     'heat_level'       => $data['heat_level'] ?? 0,
                     'size_label'       => $data['size_label'] ?? null,
                     'accent'           => $data['accent'] ?? null,

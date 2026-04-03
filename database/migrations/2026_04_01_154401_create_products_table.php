@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name');
+            $table->string('slug')->unique();
             $table->text('description')->nullable();
             $table->string('image')->nullable();
             $table->string('unit')->default('ml');
@@ -22,8 +23,14 @@ return new class extends Migration
             $table->boolean('can_sell')->default(false);
             $table->string('stripe_product_id')->nullable();
             $table->integer('price_amount')->default(0);
-            $table->string('class')->nullable();
-            $table->json('contains')->nullable();
+            $table->string('tagline')->nullable();
+            $table->string('heat_label')->nullable();
+            $table->integer('heat_level')->default(0);
+            $table->string('taste_label')->nullable();
+            $table->string('size_label')->nullable();
+            $table->string('accent')->nullable();
+            $table->string('glow')->nullable();
+            $table->integer('unit_amount')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });
