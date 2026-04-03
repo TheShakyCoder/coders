@@ -56,7 +56,7 @@ const getStatusColor = (product) => {
 
         <div class="space-y-8">
             <!-- Search & Filters (Placeholder for now) -->
-            <div class="glow-panel p-4 flex flex-wrap items-center gap-4">
+            <div class="glow-panel rounded-[2rem] p-4 flex flex-wrap items-center gap-4">
                 <div class="relative flex-1 min-w-[300px]">
                     <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                         <svg class="w-5 h-5 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -76,7 +76,7 @@ const getStatusColor = (product) => {
             </div>
 
             <!-- Products Table -->
-            <div class="glow-panel overflow-hidden border-white/5">
+            <div class="glow-panel rounded-[2rem] overflow-hidden border-white/5">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>

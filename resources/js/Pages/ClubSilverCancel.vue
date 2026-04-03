@@ -8,7 +8,7 @@ import { Head, Link } from '@inertiajs/vue3';
     <div class="site-shell">
         <div class="mesh-bg absolute inset-0 opacity-70" />
         <div class="relative mx-auto flex min-h-screen max-w-4xl items-center px-6 py-16">
-            <div class="glow-panel w-full p-8 sm:p-12">
+            <div class="glow-panel rounded-[2rem] w-full p-8 sm:p-12">
                 <p class="section-label">Club Silver</p>
                 <h1 class="mt-4 font-display text-6xl uppercase tracking-[0.08em] text-stone-50 sm:text-7xl">
                     Membership not started.

@@ -51,7 +51,7 @@ const submit = () => {
 
 <template>
     <form @submit.prevent="submit" class="space-y-6">
-        <div class="glow-panel p-6 space-y-6">
+        <div class="glow-panel rounded-[2rem] p-6 space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Basic Info -->
                 <div class="space-y-4">

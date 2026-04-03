@@ -4,20 +4,20 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ClubSilverController;
 use App\Http\Controllers\StripeWebhookController;
+use App\Services\ProductsService;
 use App\Support\ProductCatalog;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
+Route::get('/', function (ProductsService $productsService) {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
-        'products' => ProductCatalog::storefront(),
+        'products' => $productsService->storeFrontProducts(),
         'boxLimit' => ProductCatalog::boxLimit(),
         'boxName' => ProductCatalog::boxName(),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
+        'bottles' => (int) config('hot_sauce.bottles'),
     ]);
 })->name('home');
 

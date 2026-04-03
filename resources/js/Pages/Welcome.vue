@@ -2,6 +2,7 @@
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 import { computed, onMounted, ref, watch } from 'vue';
+import SlotMachine from '@/Components/SlotMachine.vue';
 
 const props = defineProps({
     canLogin: {
@@ -24,13 +25,9 @@ const props = defineProps({
 
 const page = usePage();
 const currentUser = computed(() => page.props.auth?.user ?? null);
-const clubSilverActive = computed(() => currentUser.value?.club_silver_active ?? false);
-const clubSilverEndsAt = computed(() => currentUser.value?.club_silver_ends_at ?? null);
 
 const checkoutError = ref('');
-const clubSilverError = ref('');
 const loadingCheckout = ref(false);
-const loadingClubSilver = ref(false);
 
 // Fruit machine state
 const EMPTY = { slug: null, name: 'Empty', size_label: 'No sauce selected', accent: '#44403c' };
@@ -39,28 +36,6 @@ const slotIndices = ref([0, 0, 0]);
 const spinDirections = ref(['', '', '']);
 const isSpinning = ref(false);
 const jackpot = ref(false);
-
-const getReelItem = (slotI, offset = 0) => {
-    const items = reelItems.value;
-    const len = items.length;
-    const idx = ((slotIndices.value[slotI] + offset) % len + len) % len;
-    return items[idx];
-};
-
-const spinUp = (i) => {
-    if (isSpinning.value) return;
-    spinDirections.value[i] = 'up';
-    const len = reelItems.value.length;
-    slotIndices.value[i] = ((slotIndices.value[i] - 1) + len) % len;
-    setTimeout(() => { spinDirections.value[i] = ''; }, 280);
-};
-
-const spinDown = (i) => {
-    if (isSpinning.value) return;
-    spinDirections.value[i] = 'down';
-    slotIndices.value[i] = (slotIndices.value[i] + 1) % reelItems.value.length;
-    setTimeout(() => { spinDirections.value[i] = ''; }, 280);
-};
 
 const spinReelToTarget = async (i, targetIdx) => {
     const spinCount = 6 + Math.floor(Math.random() * 4);
@@ -191,11 +166,7 @@ const deliveryPreview = computed(() =>
         : 'Build a full box to unlock the £19.99 delivered price',
 );
 
-const formatMoney = (amount) =>
-    new Intl.NumberFormat('en-GB', {
-        style: 'currency',
-        currency: 'GBP',
-    }).format(amount / 100);
+
 
 const formatDate = (value) => {
     if (!value) return 'Pending activation';
@@ -250,7 +221,7 @@ const startClubSilverCheckout = async () => {
 </script>
 
 <template>
-    <Head title="Coders Hot Sauce" />
+    <Head title="Coder's Hot Sauce" />
 
     <div class="site-shell">
         <div class="mesh-bg absolute inset-0 opacity-70" />
@@ -258,18 +229,18 @@ const startClubSilverCheckout = async () => {
         <div class="absolute right-0 top-24 h-80 w-80 rounded-full bg-orange-500/10 blur-3xl" />
         <div class="absolute left-0 top-[30rem] h-96 w-96 rounded-full bg-red-500/10 blur-3xl" />
 
-        <div class="relative mx-auto flex min-h-screen max-w-7xl flex-col px-6 pb-16 pt-6 lg:px-8">
-            <header class="glow-panel flex items-center justify-between px-5 py-4">
+        <div class="relative mx-auto flex min-h-screen max-w-7xl flex-col px-0 pb-16 sm:pt-6 lg:px-8">
+            <header class="glow-panel rounded-[2rem] flex items-center justify-between px-5 py-4">
                 <a href="#" class="flex items-center gap-4">
                     <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-orange-400/40 bg-orange-500/10 text-2xl font-display tracking-[0.18em] text-orange-300">
                         CH
                     </div>
                     <div>
                         <p class="font-display text-3xl uppercase tracking-[0.16em] text-stone-50">
-                            Coders Hot Sauce
+                            Coder's Hot Sauce
                         </p>
                         <p class="text-xs uppercase tracking-[0.28em] text-stone-400">
-                            Pizza fuel for working professionals
+                            Fuel for working techies
                         </p>
                     </div>
                 </a>
@@ -297,256 +268,9 @@ const startClubSilverCheckout = async () => {
 
             <main class="flex-1">
                 <section class="pb-20 pt-4 lg:pt-6">
-                    <!-- Slot Machine Builder — full width -->
-                    <div id="builder" class="hero-panel">
-
-                        <!-- Machine outer shell -->
-                        <div
-                            class="machine-shell mt-8"
-                            :class="{ 'jackpot-active': jackpot }"
-                        >
-                            <!-- Top panel: marquee lights -->
-                            <div class="flex items-center justify-between gap-2 border-b border-white/[0.04] bg-gradient-to-b from-black/50 to-black/20 px-4 py-3">
-                                <div class="flex gap-[5px]">
-                                    <div
-                                        v-for="j in 8"
-                                        :key="j"
-                                        class="h-2 w-2 rounded-full border border-white/[0.08] bg-stone-900 transition-[background,box-shadow] duration-200"
-                                        :class="{ 'bulb-on': isBoxFull || (isSpinning && j % 2 === 0) }"
-                                        :style="{ animationDelay: `${j * 80}ms` }"
-                                    />
-                                </div>
-                                <p
-                                    class="font-display whitespace-nowrap text-[0.6rem] uppercase tracking-[0.28em] transition-colors duration-300"
-                                    :class="jackpot ? 'text-orange-300' : 'text-stone-300/40'"
-                                >
-                                    {{ isBoxFull ? '★ JACKPOT ★' : '— CODERS HOT SAUCE —' }}
-                                </p>
-                                <div class="flex gap-[5px]">
-                                    <div
-                                        v-for="j in 8"
-                                        :key="j"
-                                        class="h-2 w-2 rounded-full border border-white/[0.08] bg-stone-900 transition-[background,box-shadow] duration-200"
-                                        :class="{ 'bulb-on': isBoxFull || (isSpinning && j % 2 !== 0) }"
-                                        :style="{ animationDelay: `${j * 80}ms` }"
-                                    />
-                                </div>
-                            </div>
-
-                            <!-- Slot progress dots -->
-                            <div class="flex items-center justify-center gap-2 border-b border-white/[0.03] bg-black/25 px-4 py-2">
-                                <div
-                                    v-for="j in boxLimit"
-                                    :key="j"
-                                    class="h-2.5 w-2.5 rounded-full border border-white/10 bg-white/[0.06] transition-[background,box-shadow] duration-300"
-                                    :style="totalBottles >= j && selectedSlots[j - 1]
-                                        ? { backgroundColor: selectedSlots[j - 1].accent, boxShadow: `0 0 8px ${selectedSlots[j - 1].accent}80` }
-                                        : {}"
-                                />
-                            </div>
-
-                            <!-- Machine body: reels -->
-                            <div class="flex items-stretch px-2 py-4">
-                                <!-- Left chrome rail -->
-                                <div class="w-[10px] shrink-0 rounded-sm bg-gradient-to-b from-white/[0.06] via-white/[0.02] to-black/20" />
-
-                                <!-- Reels -->
-                                <div class="flex flex-1 items-start px-2">
-                                    <template v-for="(_, i) in slotIndices" :key="i">
-                                        <!-- Reel separator -->
-                                        <div v-if="i > 0" class="w-px shrink-0 self-stretch bg-gradient-to-b from-transparent via-white/10 to-transparent" />
-
-                                        <!-- Reel column -->
-                                        <div class="flex flex-1 flex-col items-center gap-[0.4rem] px-1.5">
-                                            <!-- Spin up -->
-                                            <button
-                                                type="button"
-                                                class="reel-btn uppercase text-[#fb923c] flex h-16 w-full cursor-pointer items-center justify-center rounded-md border border-white/[0.08] bg-gradient-to-br from-white/[0.04] to-black/30 text-[1.5rem] text-stone-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_2px_4px_rgba(0,0,0,0.4)] transition-all duration-150 active:scale-90 disabled:cursor-not-allowed disabled:opacity-35"
-                                                :disabled="isSpinning"
-                                                @click="spinUp(i)"
-                                                aria-label="Previous sauce"
-                                            >
-                                                ▲ Up
-                                            </button>
-
-                                            <!-- Reel viewport -->
-                                            <div
-                                                class="reel-viewport relative h-[550px] w-full overflow-hidden rounded-[14px] border bg-black/[0.82] shadow-[inset_0_2px_16px_rgba(0,0,0,0.8),inset_0_0_0_1px_rgba(255,255,255,0.03)] transition-[border-color] duration-300"
-                                                :style="{
-                                                    borderColor: slotIndices[i] !== 0
-                                                        ? getReelItem(i).accent + '60'
-                                                        : 'rgba(255,255,255,0.06)',
-                                                    '--reel-glow': slotIndices[i] !== 0
-                                                        ? getReelItem(i).accent
-                                                        : 'transparent',
-                                                }"
-                                            >
-                                                <!-- Reel contents -->
-                                                <div class="relative z-[2] flex h-full flex-col">
-                                                    <!-- Previous item -->
-                                                    <div class="flex h-[100px] shrink-0 flex-col items-center justify-center px-2 opacity-[0.5]">
-                                                        <img
-                                                            v-if="getReelItem(i, -1).image"
-                                                            :src="getReelItem(i, -1).image"
-                                                            class="h-full w-full object-contain p-1 px-2.5"
-                                                            alt=""
-                                                        />
-                                                        <span v-else class="font-display text-[0.68rem] uppercase leading-snug tracking-[0.16em] text-stone-400 text-center">
-                                                            {{ getReelItem(i, -1).slug
-                                                                ? getReelItem(i, -1).name.replace("Coder's Hot ", '')
-                                                                : '—' }}
-                                                        </span>
-                                                    </div>
-
-                                                    <!-- Selected item (animated) -->
-                                                    <div class="relative h-[380px] shrink-0 overflow-hidden">
-                                                        <Transition :name="spinDirections[i] === 'up' ? 'reel-up' : 'reel-down'">
-                                                            <div
-                                                                :key="slotIndices[i]"
-                                                                class="absolute inset-0 flex flex-col items-center justify-center gap-[3px] px-2"
-                                                            >
-                                                                <template v-if="slotIndices[i] !== 0">
-                                                                    <img
-                                                                        v-if="getReelItem(i).image"
-                                                                        :src="getReelItem(i).image"
-                                                                        class="h-full w-full shrink-0 object-contain p-1 px-2.5 transition-[filter] duration-300"
-                                                                        :style="{ filter: `drop-shadow(0 0 8px ${getReelItem(i).accent}90)` }"
-                                                                        alt=""
-                                                                    />
-                                                                    <template v-else>
-                                                                        <div
-                                                                            class="h-1.5 w-1.5 shrink-0 rounded-full transition-colors duration-300"
-                                                                            :style="{ backgroundColor: getReelItem(i).accent }"
-                                                                        />
-                                                                        <p
-                                                                            class="font-display text-base uppercase leading-[1.1] tracking-[0.06em] text-center transition-colors duration-200"
-                                                                            :style="{ color: getReelItem(i).accent }"
-                                                                        >
-                                                                            {{ getReelItem(i).name.replace("Coder's Hot ", '') }}
-                                                                        </p>
-                                                                    </template>
-                                                                </template>
-                                                                <template v-else>
-                                                                    <p class="font-display text-base uppercase leading-[1.1] tracking-[0.06em] text-center text-stone-600">Empty</p>
-                                                                    <p class="text-center text-[0.55rem] uppercase tracking-[0.22em] text-stone-600">Select a sauce</p>
-                                                                </template>
-                                                            </div>
-                                                        </Transition>
-                                                    </div>
-
-                                                    <!-- Next item -->
-                                                    <div class="flex h-[100px] shrink-0 flex-col items-center justify-center px-2 opacity-[0.5]">
-                                                        <img
-                                                            v-if="getReelItem(i, 1).image"
-                                                            :src="getReelItem(i, 1).image"
-                                                            class="h-full w-full object-contain p-1 px-2.5"
-                                                            alt=""
-                                                        />
-                                                        <span v-else class="font-display text-[0.68rem] uppercase leading-snug tracking-[0.16em] text-stone-400 text-center">
-                                                            {{ getReelItem(i, 1).slug
-                                                                ? getReelItem(i, 1).name.replace("Coder's Hot ", '')
-                                                                : '—' }}
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                                <!-- Win-line overlay (centre band) -->
-                                                <div
-                                                    class="pointer-events-none absolute inset-x-0 top-[70px] z-10 h-[70px] border-b border-t transition-[border-color,background] duration-300"
-                                                    :style="{
-                                                        borderTopColor: slotIndices[i] !== 0
-                                                            ? getReelItem(i).accent + '50'
-                                                            : 'rgba(251,146,60,0.12)',
-                                                        borderBottomColor: slotIndices[i] !== 0
-                                                            ? getReelItem(i).accent + '50'
-                                                            : 'rgba(251,146,60,0.12)',
-                                                        background: slotIndices[i] !== 0
-                                                            ? getReelItem(i).accent + '0c'
-                                                            : 'rgba(251,146,60,0.02)',
-                                                    }"
-                                                />
-
-                                                <!-- Glass gloss -->
-                                                <div class="pointer-events-none absolute inset-0 z-[15] rounded-[inherit] bg-gradient-to-b from-white/[0.05] via-transparent to-black/[0.15]" />
-
-                                                <!-- Scanlines -->
-                                                <div class="pointer-events-none absolute inset-0 z-20 bg-[repeating-linear-gradient(0deg,transparent,transparent_3px,rgba(0,0,0,0.1)_3px,rgba(0,0,0,0.1)_4px)]" />
-                                            </div>
-
-                                            <!-- Spin down -->
-                                            <button
-                                                type="button"
-                                                class="reel-btn uppercase text-[#00ff00] flex h-16 w-full cursor-pointer items-center justify-center rounded-md border border-white/[0.08] bg-gradient-to-br from-white/[0.04] to-black/30 text-[1.5rem] text-stone-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_2px_4px_rgba(0,0,0,0.4)] transition-all duration-150 active:scale-90 disabled:cursor-not-allowed disabled:opacity-35"
-                                                :disabled="isSpinning"
-                                                @click="spinDown(i)"
-                                                aria-label="Next sauce"
-                                            >
-                                                ▼ Down
-                                            </button>
-
-                                            <!-- Slot number plate -->
-                                            <div class="flex h-[22px] w-[22px] items-center justify-center rounded-full border border-white/[0.08] bg-black/50 font-display text-[0.6rem] tracking-[0.05em] text-white/25">
-                                                {{ i + 1 }}
-                                            </div>
-                                        </div>
-                                    </template>
-                                </div>
-
-                                <!-- Right chrome rail -->
-                                <div class="w-[10px] shrink-0 rounded-sm bg-gradient-to-b from-white/[0.06] via-white/[0.02] to-black/20" />
-                            </div>
-
-                            <!-- Machine bottom: Random spin button -->
-                            <div class="flex items-center justify-center border-t border-white/[0.04] bg-gradient-to-b from-black/20 to-black/50 px-4 py-3">
-                                <button
-                                    type="button"
-                                    class="spin-random-btn flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-orange-500/35 bg-gradient-to-br from-orange-500/[0.18] to-orange-600/[0.08] px-6 py-[0.65rem] font-display text-[0.75rem] uppercase tracking-[0.22em] text-orange-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_0_16px_rgba(249,115,22,0.1)] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
-                                    :disabled="isSpinning"
-                                    @click="randomBox"
-                                >
-                                    <span class="text-[0.9rem]">⚡</span>
-                                    {{ isSpinning ? 'Spinning…' : 'Spin Random' }}
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Summary -->
-                        <div class="mt-6 rounded-[1.8rem] border border-white/10 bg-black/25 p-5">
-                            <div class="flex items-center justify-between text-sm uppercase tracking-[0.2em] text-stone-400">
-                                <span>Box subtotal</span>
-                                <span class="font-display text-4xl tracking-[0.08em] text-stone-50">
-                                    {{ formatMoney(subtotal) }}
-                                </span>
-                            </div>
-                            <p class="mt-3 text-sm leading-6 text-stone-400">
-                                {{ deliveryPreview }}.
-                                {{ remainingSlots > 0 ? `${remainingSlots} slot${remainingSlots === 1 ? '' : 's'} remaining.` : 'Box full.' }}
-                            </p>
-                        </div>
-
-                        <div class="mt-6 flex flex-col gap-3 sm:flex-row">
-                            <button
-                                type="button"
-                                class="fire-button"
-                                :disabled="loadingCheckout || totalBottles === 0"
-                                @click="startCheckout"
-                            >
-                                {{ checkoutLabel }}
-                            </button>
-                            <button
-                                type="button"
-                                class="ghost-button"
-                                :disabled="totalBottles === 0 || isSpinning"
-                                @click="resetBox"
-                            >
-                                Clear Box
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Hero copy — below the machine -->
-                    <div class="mt-14 grid gap-10 lg:grid-cols-[1fr_auto]">
-                        <div class="space-y-6">
+                    <div class="grid items-start gap-10 lg:grid-cols-2">
+                        <!-- Left: hero copy + credibility -->
+                        <div class="space-y-8">
                             <div class="space-y-4">
                                 <p class="section-label">Boxed heat, no filler</p>
                                 <h1 class="font-display text-6xl uppercase leading-[0.88] tracking-[0.06em] text-stone-50 sm:text-8xl">
@@ -565,22 +289,25 @@ const startClubSilverCheckout = async () => {
                             <p v-if="checkoutError" class="rounded-2xl border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
                                 {{ checkoutError }}
                             </p>
+
+                            <div class="grid gap-4 sm:grid-cols-3">
+                                <article
+                                    v-for="item in credibility"
+                                    :key="item.title"
+                                    class="stat-card"
+                                >
+                                    <p class="text-xs uppercase tracking-[0.28em] text-orange-300">
+                                        {{ item.title }}
+                                    </p>
+                                    <p class="mt-3 text-sm leading-7 text-stone-300">
+                                        {{ item.copy }}
+                                    </p>
+                                </article>
+                            </div>
                         </div>
 
-                        <div class="grid content-start gap-4 sm:grid-cols-3 lg:w-[480px] lg:grid-cols-1">
-                            <article
-                                v-for="item in credibility"
-                                :key="item.title"
-                                class="stat-card"
-                            >
-                                <p class="text-xs uppercase tracking-[0.28em] text-orange-300">
-                                    {{ item.title }}
-                                </p>
-                                <p class="mt-3 text-sm leading-7 text-stone-300">
-                                    {{ item.copy }}
-                                </p>
-                            </article>
-                        </div>
+                        <!-- Right: slot machine -->
+                        <SlotMachine :products="products" :box-limit="boxLimit" :checkout-label="checkoutLabel" :loading-checkout="loadingCheckout" @change="onSelectionChange" />
                     </div>
                 </section>
 
@@ -647,7 +374,7 @@ const startClubSilverCheckout = async () => {
                 </section>
 
                 <section id="merch" class="pb-20">
-                    <div class="glow-panel p-8 sm:p-10 border-dashed border-2 border-orange-500/20">
+                    <div class="glow-panel rounded-[2rem] p-8 sm:p-10 border-dashed border-2 border-orange-500/20">
                         <p class="section-label">Provision</p>
                         <h2 class="mt-4 font-display text-5xl uppercase tracking-[0.08em] text-stone-50">
                             Branded Merch.
@@ -674,7 +401,7 @@ const startClubSilverCheckout = async () => {
                         <article
                             v-for="testimonial in testimonials"
                             :key="testimonial.role"
-                            class="glow-panel p-8"
+                            class="glow-panel rounded-[2rem] p-8"
                         >
                             <p class="text-lg leading-8 text-stone-200">
                                 "{{ testimonial.quote }}"
@@ -687,7 +414,7 @@ const startClubSilverCheckout = async () => {
                 </section>
             </main>
 
-            <footer class="glow-panel flex flex-col gap-6 px-6 py-8 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
+            <footer class="glow-panel rounded-[2rem] flex flex-col gap-6 px-6 py-8 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                     <p class="section-label">Final CTA</p>
                     <h2 class="mt-3 font-display text-4xl uppercase tracking-[0.08em] text-stone-50">

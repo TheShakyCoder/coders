@@ -45,7 +45,7 @@ const stats = [
             </div>
 
             <!-- Recent Activity Placeholder -->
-            <div class="glow-panel p-8">
+            <div class="glow-panel rounded-[2rem] p-8">
                 <div class="flex items-center justify-between mb-8">
                     <h2 class="text-xl font-bold text-stone-100 tracking-wide">Recent Activity</h2>
                     <button class="text-orange-400 text-sm hover:text-orange-300 transition-colors uppercase tracking-widest font-bold">View All</button>
