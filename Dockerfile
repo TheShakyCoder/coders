@@ -1,8 +1,17 @@
 # Stage 1: Build Frontend Assets
 FROM node:22-slim AS build-assets
 WORKDIR /app
+
+# Install composer so we can get vendor/tightenco/ziggy before Vite runs
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+RUN apt-get update && apt-get install -y --no-install-recommends php-cli unzip && rm -rf /var/lib/apt/lists/*
+
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+
 COPY package*.json ./
 RUN npm install
+
 COPY . .
 RUN npm run build
 
