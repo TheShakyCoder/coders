@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["nodejs_22", "npm-9_x", "php83", "php83Packages.composer", "libmysqlclient", "nginx"]
+nixPkgs = ["nodejs_22", "npm-11_x", "php84", "php84Packages.composer", "libmysqlclient", "nginx"]
 
 [variables]
 NODE_VERSION = "22"
