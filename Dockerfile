@@ -7,7 +7,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 RUN apt-get update && apt-get install -y --no-install-recommends php-cli unzip && rm -rf /var/lib/apt/lists/*
 
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --ignore-platform-reqs
 
 COPY package*.json ./
 RUN npm install
