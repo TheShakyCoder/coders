@@ -16,8 +16,7 @@ const emit = defineEmits(['change']);
 const CELL_H = 120;
 const STRIP_REPS = 14;
 
-const EMPTY = { slug: null, name: 'Empty', accent: '#44403c' };
-const reelItems = computed(() => [EMPTY, ...props.products]);
+const reelItems = computed(() => props.products);
 
 const stripItems = computed(() => {
     const out = [];
@@ -92,7 +91,7 @@ const spinRandom = async () => {
 
     const productCount = props.products.length;
     const targets = Array.from({ length: props.boxLimit }, () =>
-        Math.floor(Math.random() * productCount) + 1,
+        Math.floor(Math.random() * productCount),
     );
 
     await Promise.all(
@@ -120,10 +119,7 @@ onMounted(() => { setTimeout(spinRandom, 400); });
 // ─── Derived selection ────────────────────────────────────────────────────────
 
 const selectedSlots = computed(() =>
-    slotIndices.value.map(i => {
-        const item = reelItems.value[i];
-        return item.slug ? item : null;
-    }),
+    slotIndices.value.map(i => reelItems.value[i]),
 );
 
 const totalBottles = computed(() => selectedSlots.value.filter(Boolean).length);
@@ -230,7 +226,7 @@ const remainingSlots = computed(() => props.boxLimit - totalBottles.value);
             <div class="flex items-center justify-center gap-2 border-b border-white/[0.03] bg-black/25 px-4 py-2">
                 <div v-for="j in boxLimit" :key="j"
                     class="h-2.5 w-2.5 rounded-full border border-white/10 bg-white/[0.06] transition-[background,box-shadow] duration-300"
-                    :style="totalBottles >= j && selectedSlots[j - 1]
+                    :style="selectedSlots[j - 1]
                         ? { backgroundColor: selectedSlots[j - 1].accent, boxShadow: `0 0 8px ${selectedSlots[j - 1].accent}80` }
                         : {}" />
             </div>
@@ -255,8 +251,8 @@ const remainingSlots = computed(() => props.boxLimit - totalBottles.value);
                             <div class="reel-viewport relative w-full overflow-hidden rounded-[14px] border bg-black/[0.82] shadow-[inset_0_2px_16px_rgba(0,0,0,0.8),inset_0_0_0_1px_rgba(255,255,255,0.03)] transition-[border-color] duration-500"
                                 :style="{
                                     height: `${3 * 120}px`,
-                                    borderColor: slotIndices[i] !== 0 ? getReelItem(i).accent + '60' : 'rgba(255,255,255,0.06)',
-                                    '--reel-glow': slotIndices[i] !== 0 ? getReelItem(i).accent : 'transparent',
+                                    borderColor: getReelItem(i).accent + '60',
+                                    '--reel-glow': getReelItem(i).accent,
                                 }">
                                 <!-- Scrolling strip -->
                                 <div class="absolute left-0 top-0 w-full will-change-transform" :style="{
@@ -265,12 +261,10 @@ const remainingSlots = computed(() => props.boxLimit - totalBottles.value);
                                 }">
                                     <div v-for="(item, si) in stripItems" :key="si"
                                         class="flex items-center justify-center" style="height: 120px">
-                                        <img v-if="item.image" :src="item.image"
+                                        <img :src="item.image"
                                             class="h-full w-full object-contain p-1 px-3"
-                                            :style="{ filter: item.slug ? `drop-shadow(0 0 10px ${item.accent}80)` : 'none' }"
+                                            :style="{ filter: `drop-shadow(0 0 10px ${item.accent}80)` }"
                                             alt="" />
-                                        <span v-else
-                                            class="font-display text-sm uppercase tracking-[0.12em] text-stone-600">Empty</span>
                                     </div>
                                 </div>
 
@@ -284,9 +278,9 @@ const remainingSlots = computed(() => props.boxLimit - totalBottles.value);
                                     :style="{
                                         top: '120px',
                                         height: '120px',
-                                        borderTopColor: slotIndices[i] !== 0 ? getReelItem(i).accent + '55' : 'rgba(251,146,60,0.12)',
-                                        borderBottomColor: slotIndices[i] !== 0 ? getReelItem(i).accent + '55' : 'rgba(251,146,60,0.12)',
-                                        background: slotIndices[i] !== 0 ? getReelItem(i).accent + '0d' : 'rgba(251,146,60,0.02)',
+                                        borderTopColor: getReelItem(i).accent + '55',
+                                        borderBottomColor: getReelItem(i).accent + '55',
+                                        background: getReelItem(i).accent + '0d',
                                     }" />
 
                                 <div
@@ -306,7 +300,7 @@ const remainingSlots = computed(() => props.boxLimit - totalBottles.value);
                                     {{ i + 1 }}
                                 </div>
                                 <Transition name="label-pop">
-                                    <div v-if="!isSpinning && slotIndices[i] !== 0" :key="slotIndices[i]"
+                                    <div v-if="!isSpinning" :key="slotIndices[i]"
                                         class="flex flex-col items-center gap-[2px] text-center">
                                         <span class="text-[1rem] uppercase tracking-[0.18em] text-stone-400">
                                             {{ getReelItem(i).heat_label }}
@@ -341,8 +335,7 @@ const remainingSlots = computed(() => props.boxLimit - totalBottles.value);
                 </span>
             </div>
             <p class="mt-3 text-sm leading-6 text-stone-400">
-                {{ deliveryPreview }}.
-                {{ remainingSlots > 0 ? `${remainingSlots} slot${remainingSlots === 1 ? '' : 's'} remaining.` : 'Box full.' }}
+                {{ deliveryPreview }}.<br>
             </p>
         </div>
 

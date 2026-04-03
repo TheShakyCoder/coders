@@ -4,6 +4,7 @@ import axios from 'axios';
 import { computed, onMounted, ref, watch } from 'vue';
 import SlotMachine from '@/Components/SlotMachine.vue';
 import { numberToWord } from '@/Composables/formatting';
+import Logo from '@/Components/Logo.vue';
 
 const props = defineProps({
     canLogin: {
@@ -205,10 +206,10 @@ const startCheckout = async () => {
         <div class="absolute left-0 top-[30rem] h-96 w-96 rounded-full bg-red-500/10 blur-3xl" />
 
         <div class="relative mx-auto flex min-h-screen max-w-7xl flex-col px-0 pb-16 sm:pt-6 lg:px-8">
-            <header class="glow-panel rounded-[2rem] flex items-center justify-between px-5 py-4">
+            <header class="glow-panel rounded-none sm:rounded-[2rem] flex items-center justify-between px-5 py-4">
                 <a href="#" class="flex items-center gap-4">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-orange-400/40 bg-orange-500/10 text-2xl font-display tracking-[0.18em] text-orange-300">
-                        CH
+                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl text-2xl font-display tracking-[0.18em] text-orange-300">
+                        <Logo />
                     </div>
                     <div>
                         <p class="font-display text-3xl uppercase tracking-[0.16em] text-stone-50">
@@ -223,7 +224,7 @@ const startCheckout = async () => {
                 <nav class="hidden items-center gap-6 text-sm uppercase tracking-[0.22em] text-stone-300 md:flex">
                     <a href="#bottles" class="transition hover:text-orange-300">Bottles</a>
                     <a href="#builder" class="transition hover:text-orange-300">Build a Box</a>
-                    <a href="#club-silver" class="transition hover:text-orange-300">Club Silver</a>
+                    <a href="#merchandise" class="transition hover:text-orange-300">Merchandise</a>
                     <Link
                         v-if="$page.props.auth.user"
                         :href="route('dashboard')"
@@ -361,7 +362,7 @@ const startCheckout = async () => {
                     </div>
                 </section>
 
-                <section id="merch" class="pb-20">
+                <section id="merchandise" class="pb-20">
                     <div class="glow-panel rounded-none sm:rounded-[2rem] p-8 sm:p-10 border-dashed border-2 border-orange-500/20">
                         <p class="section-label">Provision</p>
                         <h2 class="mt-4 font-display text-5xl uppercase tracking-[0.08em] text-stone-50">
