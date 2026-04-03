@@ -27,10 +27,23 @@ Route::get('/checkout/cancel', [CheckoutController::class, 'cancel'])->name('che
 Route::post('/stripe/webhook', StripeWebhookController::class)->name('stripe.webhook');
 
 Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
+    $orders = auth()->user()
+        ->orders()
+        ->latest()
+        ->get()
+        ->map(fn ($o) => [
+            'public_id'    => $o->public_id,
+            'status'       => $o->status,
+            'total_amount' => $o->total_amount,
+            'currency'     => $o->currency,
+            'paid_at'      => $o->paid_at?->toISOString(),
+            'created_at'   => $o->created_at->toISOString(),
+        ]);
+
+    return Inertia::render('Dashboard', compact('orders'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/club-silver/session', [ClubSilverController::class, 'store'])->name('club-silver.store');
     Route::get('/club-silver/success', [ClubSilverController::class, 'success'])->name('club-silver.success');
     Route::get('/club-silver/cancel', [ClubSilverController::class, 'cancel'])->name('club-silver.cancel');

@@ -3,7 +3,6 @@ import Checkbox from '@/Components/Checkbox.vue';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
@@ -33,68 +32,68 @@ const submit = () => {
     <GuestLayout>
         <Head title="Log in" />
 
-        <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
+        <div v-if="status" class="mb-4 rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-300">
             {{ status }}
         </div>
 
-        <form @submit.prevent="submit">
+        <form @submit.prevent="submit" class="space-y-5">
             <div>
-                <InputLabel for="email" value="Email" />
-
+                <InputLabel for="email" value="Email" class="text-stone-400 uppercase tracking-[0.18em] text-xs" />
                 <TextInput
                     id="email"
                     type="email"
-                    class="mt-1 block w-full"
+                    class="mt-2 block w-full rounded-xl border-white/10 bg-white/5 text-stone-100 placeholder-stone-600 focus:border-orange-500/50 focus:ring-orange-500/30"
                     v-model="form.email"
                     required
                     autofocus
                     autocomplete="username"
                 />
-
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>
 
-            <div class="mt-4">
-                <InputLabel for="password" value="Password" />
-
+            <div>
+                <InputLabel for="password" value="Password" class="text-stone-400 uppercase tracking-[0.18em] text-xs" />
                 <TextInput
                     id="password"
                     type="password"
-                    class="mt-1 block w-full"
+                    class="mt-2 block w-full rounded-xl border-white/10 bg-white/5 text-stone-100 placeholder-stone-600 focus:border-orange-500/50 focus:ring-orange-500/30"
                     v-model="form.password"
                     required
                     autocomplete="current-password"
                 />
-
                 <InputError class="mt-2" :message="form.errors.password" />
             </div>
 
-            <div class="mt-4 block">
-                <label class="flex items-center">
+            <div class="flex items-center justify-between">
+                <label class="flex items-center gap-2 cursor-pointer">
                     <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ms-2 text-sm text-gray-600 dark:text-gray-400"
-                        >Remember me</span
-                    >
+                    <span class="text-sm text-stone-400">Remember me</span>
                 </label>
-            </div>
 
-            <div class="mt-4 flex items-center justify-end">
                 <Link
                     v-if="canResetPassword"
                     :href="route('password.request')"
-                    class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
+                    class="text-xs uppercase tracking-[0.18em] text-stone-500 hover:text-orange-300 transition-colors"
                 >
-                    Forgot your password?
+                    Forgot password?
                 </Link>
-
-                <PrimaryButton
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Log in
-                </PrimaryButton>
             </div>
+
+            <button
+                type="submit"
+                class="fire-button w-full"
+                :class="{ 'opacity-50 cursor-not-allowed': form.processing }"
+                :disabled="form.processing"
+            >
+                {{ form.processing ? 'Signing in…' : 'Sign in' }}
+            </button>
+
+            <p class="mt-6 text-center text-sm text-stone-500">
+                Don't have an account?
+                <Link :href="route('register')" class="text-orange-400 hover:text-orange-300 transition-colors">
+                    Register
+                </Link>
+            </p>
         </form>
     </GuestLayout>
 </template>
