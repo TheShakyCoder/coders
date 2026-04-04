@@ -289,7 +289,7 @@ const startCheckout = async () => {
                 </section>
 
                 <section id="bottles" class="pb-12">
-                    <div class="mb-8 flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between px-5 sm:px-0">
+                    <div class="mb-8 flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between px-5 md:px-0">
                         <div>
                             <p class="section-label">Choose from</p>
                             <h2
