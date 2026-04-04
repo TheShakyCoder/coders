@@ -197,18 +197,21 @@ const startCheckout = async () => {
 </script>
 
 <template>
+
     <Head title="Coder's Hot Sauce" />
 
     <div class="site-shell">
         <div class="mesh-bg absolute inset-0 opacity-70" />
-        <div class="absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top,rgba(249,115,22,0.32),transparent_55%)]" />
+        <div
+            class="absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top,rgba(249,115,22,0.32),transparent_55%)]" />
         <div class="absolute right-0 top-24 h-80 w-80 rounded-full bg-orange-500/10 blur-3xl" />
         <div class="absolute left-0 top-[30rem] h-96 w-96 rounded-full bg-red-500/10 blur-3xl" />
 
         <div class="relative mx-auto flex min-h-screen max-w-7xl flex-col px-0 pb-16 lg:pt-6 lg:px-8">
             <header class="glow-panel rounded-none lg:rounded-[2rem] flex items-center justify-between px-5 py-4">
                 <a href="#" class="flex items-center gap-4">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl text-2xl font-display tracking-[0.18em] text-orange-300">
+                    <div
+                        class="flex h-12 w-12 items-center justify-center rounded-2xl text-2xl font-display tracking-[0.18em] text-orange-300">
                         <Logo />
                     </div>
                     <div>
@@ -225,18 +228,10 @@ const startCheckout = async () => {
                     <a href="#bottles" class="transition hover:text-orange-300">Bottles</a>
                     <a href="#builder" class="transition hover:text-orange-300">Build a Box</a>
                     <a href="#merchandise" class="transition hover:text-orange-300">Merchandise</a>
-                    <Link
-                        v-if="$page.props.auth.user"
-                        :href="route('dashboard')"
-                        class="ghost-button px-4 py-2"
-                    >
+                    <Link v-if="$page.props.auth.user" :href="route('dashboard')" class="ghost-button px-4 py-2">
                         Dashboard
                     </Link>
-                    <Link
-                        v-else-if="canLogin"
-                        :href="route('login')"
-                        class="ghost-button px-4 py-2"
-                    >
+                    <Link v-else-if="canLogin" :href="route('login')" class="ghost-button px-4 py-2">
                         Sign In
                     </Link>
                 </nav>
@@ -250,11 +245,12 @@ const startCheckout = async () => {
                             <div class="flex lg:flex-col gap-4 px-5 lg:px-0">
                                 <div class="w-full">
                                     <p class="section-label">Boxed heat, no filler</p>
-                                    <h1 class="font-display text-5xl uppercase leading-[0.88] tracking-[0.06em] text-stone-50 sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl">
+                                    <h1
+                                        class="font-display text-5xl uppercase leading-[0.88] tracking-[0.06em] text-stone-50 sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl">
                                         {{ numberToWord(products.length) }} sauces.<br>Three slots.<br>One great box.
                                     </h1>
                                 </div>
-                                
+
                                 <div>
                                     <p class="max-w-2xl text-lg leading-8 text-stone-300">
                                         Build a box from {{ numberToWord(products.length) }} 125ml bottles including
@@ -269,16 +265,13 @@ const startCheckout = async () => {
                                 </div>
                             </div>
 
-                            <p v-if="checkoutError" class="rounded-2xl border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+                            <p v-if="checkoutError"
+                                class="rounded-2xl border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
                                 {{ checkoutError }}
                             </p>
 
                             <div class="grid gap-4 sm:grid-cols-3">
-                                <article
-                                v-for="item in credibility"
-                                    :key="item.title"
-                                    class="stat-card"
-                                >
+                                <article v-for="item in credibility" :key="item.title" class="stat-card">
                                     <p class="text-xs uppercase tracking-[0.28em] text-orange-300">
                                         {{ item.title }}
                                     </p>
@@ -287,21 +280,11 @@ const startCheckout = async () => {
                                     </p>
                                 </article>
                             </div>
-                            
-                            <div class="px-5 lg:px-0">
-
-                                <h3 class="text-2xl font-bold text-orange-300">All our sauces are</h3>
-                                <ul class="list-disc list-inside span-2 text-lg">
-                                    <li v-for="sauce in ourSauces" :key="sauce">
-                                        {{ sauce }}
-                                    </li>
-                                </ul>
-                                
-                            </div>
                         </div>
 
                         <!-- Right: slot machine -->
-                        <SlotMachine :products="products" :box-limit="boxLimit" :checkout-label="checkoutLabel" :loading-checkout="loadingCheckout" @start-checkout="startCheckout" />
+                        <SlotMachine :products="products" :box-limit="boxLimit" :checkout-label="checkoutLabel"
+                            :loading-checkout="loadingCheckout" @start-checkout="startCheckout" />
                     </div>
                 </section>
 
@@ -309,32 +292,27 @@ const startCheckout = async () => {
                     <div class="mb-8 flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between px-5 sm:px-0">
                         <div>
                             <p class="section-label">Choose from</p>
-                             <h2 class="mt-3 font-display text-5xl uppercase tracking-[0.08em] text-stone-50 sm:text-6xl">
+                            <h2
+                                class="mt-3 font-display text-5xl uppercase tracking-[0.08em] text-stone-50 sm:text-6xl">
                                 {{ numberToWord(products.length) }} 125ml bottles.<br>Buy One £19.99 Box.
                             </h2>
                         </div>
                         <p class="max-w-xl text-base leading-7 text-stone-400">
-                            Build a safe office box, a sweet-and-hot split, or a heavier late-night mix with Chocolate in the rotation.
+                            Build a safe office box, a sweet-and-hot split, or a heavier late-night mix with Chocolate
+                            in the rotation.
                         </p>
                     </div>
 
                     <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-                        <article
-                            v-for="product in products"
-                            :key="product.slug"
-                            class="product-card"
-                            :style="{
-                                '--card-accent': product.accent,
-                                '--card-glow': product.glow,
-                            }"
-                        >
+                        <article v-for="product in products" :key="product.slug" class="product-card" :style="{
+                            '--card-accent': product.accent,
+                            '--card-glow': product.glow,
+                        }">
                             <div class="relative z-10 flex h-full flex-col">
                                 <div class="flex items-start justify-between gap-4">
                                     <p class="section-label">{{ product.size_label }}</p>
-                                    <span
-                                        v-if="counts[product.slug] > 0"
-                                        class="chip border-white/10 bg-white/5 text-stone-300"
-                                    >
+                                    <span v-if="counts[product.slug] > 0"
+                                        class="chip border-white/10 bg-white/5 text-stone-300">
                                         ×{{ counts[product.slug] }} in box
                                     </span>
                                     <span v-else class="chip border-white/10 bg-white/5 text-stone-300">
@@ -356,9 +334,11 @@ const startCheckout = async () => {
                                     {{ product.description }}
                                 </p>
 
-                                <div class="mt-6 flex items-center justify-between text-xs uppercase tracking-[0.24em] text-stone-500">
+                                <div
+                                    class="mt-6 flex items-center justify-between text-xs uppercase tracking-[0.24em] text-stone-500">
                                     <span>Heat</span>
-                                    <span class="font-display text-2xl tracking-[0.16em]" :style="{ color: product.accent }">
+                                    <span class="font-display text-2xl tracking-[0.16em]"
+                                        :style="{ color: product.accent }">
                                         {{ heatScale(product.heat_level) }}
                                     </span>
                                 </div>
@@ -368,22 +348,36 @@ const startCheckout = async () => {
                 </section>
 
                 <section id="merchandise" class="pb-20">
-                    <div class="glow-panel rounded-none sm:rounded-[2rem] p-8 sm:p-10 border-dashed border-2 border-orange-500/20">
-                        <p class="section-label">Provision</p>
-                        <h2 class="mt-4 font-display text-5xl uppercase tracking-[0.08em] text-stone-50">
-                            Branded Merch.
-                        </h2>
-                        <p class="mt-6 text-base leading-8 text-stone-300">
-                            Provisions are being made to sell branded apparel and gear. Details are currently being finalized to ensure every thread meets the same standard as the sauce.
-                        </p>
-                        <div class="mt-8 flex items-center gap-4 text-orange-300/50">
-                            <span class="text-sm uppercase tracking-[0.2em]">Coming Soon</span>
-                            <div class="h-px flex-1 bg-gradient-to-r from-orange-500/20 to-transparent" />
+                    <div class="flex flex-col md:flex-row items-start md:items-center">
+                        <div
+                            class="w-full sm:w-2/3 glow-panel rounded-none sm:rounded-[2rem] p-8 sm:p-10 border-dashed border-2 border-orange-500/20">
+                            <p class="section-label">Provision</p>
+                            <h2 class="mt-4 font-display text-5xl uppercase tracking-[0.08em] text-stone-50">
+                                Branded Merch.
+                            </h2>
+                            <p class="mt-6 text-base leading-8 text-stone-300">
+                                Provisions are being made to sell branded apparel and gear. Details are currently being
+                                finalized to ensure every thread meets the same standard as the sauce.
+                            </p>
+                            <div class="mt-8 flex items-center gap-4 text-orange-300/50">
+                                <span class="text-sm uppercase tracking-[0.2em]">Coming Soon</span>
+                                <div class="h-px flex-1 bg-gradient-to-r from-orange-500/20 to-transparent" />
+                            </div>
+                        </div>
+
+                        <div class="px-10 mt-10 md:mt-0">
+                            <h3 class="text-2xl font-bold text-orange-300">All our sauces are</h3>
+                            <ul class="list-disc list-inside span-2 text-lg">
+                                <li v-for="sauce in ourSauces" :key="sauce">
+                                    {{ sauce }}
+                                </li>
+                            </ul>
+
                         </div>
                     </div>
                 </section>
 
-                <section id="proof" class="pb-16">
+                <section id="proof" class="pb-16 px-10 md:px-0">
                     <div class="mb-8 px-5 sm:px-0">
                         <p class="section-label">Testimonials</p>
                         <h2 class="mt-3 font-display text-5xl uppercase tracking-[0.08em] text-stone-50 sm:text-6xl">
@@ -392,11 +386,8 @@ const startCheckout = async () => {
                     </div>
 
                     <div class="grid gap-6 lg:grid-cols-3">
-                        <article
-                            v-for="testimonial in testimonials"
-                            :key="testimonial.role"
-                            class="glow-panel rounded-none sm:rounded-[2rem] p-8"
-                        >
+                        <article v-for="testimonial in testimonials" :key="testimonial.role"
+                            class="glow-panel rounded-none sm:rounded-[2rem] p-8">
                             <p class="text-lg leading-8 text-stone-200">
                                 "{{ testimonial.quote }}"
                             </p>
@@ -408,7 +399,8 @@ const startCheckout = async () => {
                 </section>
             </main>
 
-            <footer class="glow-panel rounded-none sm:rounded-[2rem] flex flex-col gap-6 px-6 py-8 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
+            <footer
+                class="glow-panel rounded-none sm:rounded-[2rem] flex flex-col gap-6 px-6 py-8 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                     <p class="section-label">Final CTA</p>
                     <h2 class="mt-3 font-display text-4xl uppercase tracking-[0.08em] text-stone-50">
@@ -440,7 +432,9 @@ const startCheckout = async () => {
 }
 
 @keyframes jackpot-pulse {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow:
             inset 0 1px 0 rgba(255, 255, 255, 0.06),
             inset 0 -6px 24px rgba(0, 0, 0, 0.7),
@@ -448,6 +442,7 @@ const startCheckout = async () => {
             0 0 0 4px rgba(100, 90, 80, 0.12),
             0 12px 40px rgba(0, 0, 0, 0.55);
     }
+
     50% {
         box-shadow:
             inset 0 1px 0 rgba(255, 255, 255, 0.06),
@@ -465,8 +460,13 @@ const startCheckout = async () => {
 
 /* ─── Marquee bulb lit state + flicker animation ─────────────── */
 @keyframes bulb-flicker {
-    from { opacity: 1; }
-    to { opacity: 0.75; }
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0.75;
+    }
 }
 
 .bulb-on {
@@ -490,50 +490,91 @@ const startCheckout = async () => {
 
 /* ─── Reel button green pulse ─────────────────────────────────── */
 @keyframes reel-btn-pulse {
-    0%, 100% {
-        background: linear-gradient(135deg, rgba(34,197,94,0.18), rgba(22,163,74,0.08));
-        box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 0 8px rgba(34,197,94,0.3);
-        border-color: rgba(34,197,94,0.35);
+
+    0%,
+    100% {
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.18), rgba(22, 163, 74, 0.08));
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 0 8px rgba(34, 197, 94, 0.3);
+        border-color: rgba(34, 197, 94, 0.35);
     }
+
     50% {
-        background: linear-gradient(135deg, rgba(34,197,94,0.35), rgba(22,163,74,0.18));
-        box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 18px rgba(34,197,94,0.6), 0 0 32px rgba(34,197,94,0.2);
-        border-color: rgba(34,197,94,0.65);
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.35), rgba(22, 163, 74, 0.18));
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 18px rgba(34, 197, 94, 0.6), 0 0 32px rgba(34, 197, 94, 0.2);
+        border-color: rgba(34, 197, 94, 0.65);
     }
 }
-.reel-btn { animation: reel-btn-pulse 2s ease-in-out infinite; color: #86efac; }
-.reel-btn:disabled { animation: none; }
+
+.reel-btn {
+    animation: reel-btn-pulse 2s ease-in-out infinite;
+    color: #86efac;
+}
+
+.reel-btn:disabled {
+    animation: none;
+}
+
 .reel-btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, rgba(34,197,94,0.45), rgba(22,163,74,0.25));
-    border-color: rgba(34,197,94,0.8);
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.45), rgba(22, 163, 74, 0.25));
+    border-color: rgba(34, 197, 94, 0.8);
     color: #bbf7d0;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px rgba(34,197,94,0.5);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 24px rgba(34, 197, 94, 0.5);
     animation: none;
 }
 
 /* ─── Spin random button hover ───────────────────────────────── */
 .spin-random-btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, rgba(249,115,22,0.3) 0%, rgba(234,88,12,0.16) 100%);
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.3) 0%, rgba(234, 88, 12, 0.16) 100%);
     border-color: rgba(249, 115, 22, 0.6);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 0 24px rgba(249,115,22,0.25);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 0 24px rgba(249, 115, 22, 0.25);
 }
 
 /* ─── Vue reel transitions ───────────────────────────────────── */
-.reel-up-enter-from { transform: translateY(-100%); opacity: 0; }
-.reel-up-leave-to   { transform: translateY(100%);  opacity: 0; }
-.reel-up-enter-active { transition: transform 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.14s ease; }
+.reel-up-enter-from {
+    transform: translateY(-100%);
+    opacity: 0;
+}
+
+.reel-up-leave-to {
+    transform: translateY(100%);
+    opacity: 0;
+}
+
+.reel-up-enter-active {
+    transition: transform 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.14s ease;
+}
+
 .reel-up-leave-active {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     transition: transform 0.22s cubic-bezier(0.55, 0, 0.55, 0.2), opacity 0.14s ease;
 }
 
-.reel-down-enter-from { transform: translateY(100%);  opacity: 0; }
-.reel-down-leave-to   { transform: translateY(-100%); opacity: 0; }
-.reel-down-enter-active { transition: transform 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.14s ease; }
+.reel-down-enter-from {
+    transform: translateY(100%);
+    opacity: 0;
+}
+
+.reel-down-leave-to {
+    transform: translateY(-100%);
+    opacity: 0;
+}
+
+.reel-down-enter-active {
+    transition: transform 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.14s ease;
+}
+
 .reel-down-leave-active {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     transition: transform 0.22s cubic-bezier(0.55, 0, 0.55, 0.2), opacity 0.14s ease;
 }
 </style>
