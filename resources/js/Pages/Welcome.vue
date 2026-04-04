@@ -1,13 +1,13 @@
 <script setup>
-import { Head, Link, usePage } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import axios from 'axios';
-import { computed, onMounted, ref, watch } from 'vue';
-import SlotMachine from '@/Components/Sections/SlotMachine.vue';
+import { computed, ref, watch } from 'vue';
 import Contact from '@/Components/Sections/Contact.vue';
 import FinalCta from '@/Components/Sections/FinalCta.vue';
 import Testimonials from '@/Components/Sections/Testimonials.vue';
 import { numberToWord } from '@/Composables/formatting';
 import Logo from '@/Components/Logo.vue';
+import Hero from '@/Components/Sections/Hero.vue';
 
 const props = defineProps({
     canLogin: {
@@ -28,9 +28,6 @@ const props = defineProps({
     },
 });
 
-const page = usePage();
-const currentUser = computed(() => page.props.auth?.user ?? null);
-
 const checkoutError = ref('');
 const loadingCheckout = ref(false);
 
@@ -38,49 +35,7 @@ const loadingCheckout = ref(false);
 const EMPTY = { slug: null, name: 'Empty', size_label: 'No sauce selected', accent: '#44403c' };
 const reelItems = computed(() => [EMPTY, ...props.products]);
 const slotIndices = ref([0, 0, 0]);
-const spinDirections = ref(['', '', '']);
-const isSpinning = ref(false);
 const jackpot = ref(false);
-
-const spinReelToTarget = async (i, targetIdx) => {
-    const spinCount = 6 + Math.floor(Math.random() * 4);
-    for (let s = 0; s < spinCount; s++) {
-        spinDirections.value[i] = 'down';
-        slotIndices.value[i] = (slotIndices.value[i] + 1) % reelItems.value.length;
-        await new Promise(r => setTimeout(r, 100));
-    }
-    // Final landing
-    spinDirections.value[i] = 'down';
-    slotIndices.value[i] = targetIdx;
-    await new Promise(r => setTimeout(r, 340));
-    spinDirections.value[i] = '';
-};
-
-const randomBox = async () => {
-    if (isSpinning.value) return;
-    isSpinning.value = true;
-    checkoutError.value = '';
-
-    const productCount = props.products.length;
-    const targets = Array.from({ length: 3 }, () =>
-        Math.floor(Math.random() * productCount) + 1,
-    );
-
-    // Stagger reel starts for that classic slot machine feel
-    await Promise.all(
-        targets.map((target, i) =>
-            new Promise(resolve =>
-                setTimeout(() => spinReelToTarget(i, target).then(resolve), i * 260),
-            ),
-        ),
-    );
-
-    isSpinning.value = false;
-};
-
-onMounted(() => {
-    setTimeout(randomBox, 400);
-});
 
 // Derived from slot machine
 const selectedSlots = computed(() =>
@@ -91,7 +46,6 @@ const selectedSlots = computed(() =>
 );
 
 const totalBottles = computed(() => selectedSlots.value.filter(Boolean).length);
-
 const isBoxFull = computed(() => totalBottles.value === props.boxLimit);
 
 watch(isBoxFull, (full) => {
@@ -108,25 +62,15 @@ const counts = computed(() =>
     }, {}),
 );
 
-const subtotal = computed(() => {
-    if (totalBottles.value === props.boxLimit) return 1999;
-    return props.products.reduce(
-        (sum, p) => sum + (counts.value[p.slug] ?? 0) * Number(p.unit_amount ?? 0),
-        0,
-    );
-});
-
 const selectedItemsPayload = computed(() =>
     props.products
         .filter(p => (counts.value[p.slug] ?? 0) > 0)
         .map(p => ({ product: p.slug, quantity: counts.value[p.slug] })),
 );
 
-const remainingSlots = computed(() => props.boxLimit - totalBottles.value);
-
 const credibility = [
     {
-        title: '4 Bottle Range',
+        title: numberToWord(props.products.length) + ' Bottle Range',
         copy: 'Classic, Mango, Hot Honey, and the darker Chocolate bottle. All 125ml, all built for pizza.',
     },
     {
@@ -138,7 +82,6 @@ const credibility = [
         copy: 'Coming soon. Wear the heat while you shop the box. Provisions are being made.',
     },
 ];
-
 
 const ourSauces = [
     'soya free',
@@ -228,62 +171,15 @@ const startCheckout = async () => {
             </header>
 
             <main class="flex-1">
-                <section class="pb-20 pt-4 lg:pt-6">
-                    <div class="grid items-start gap-10 lg:grid-cols-2">
-                        <!-- Left: hero copy + credibility -->
-                        <div class="space-y-8">
-                            <div class="flex lg:flex-col gap-4 px-5 lg:px-0">
-                                <div class="w-full">
-                                    <p class="section-label">Boxed heat, no filler</p>
-                                    <h1
-                                        class="font-display text-5xl uppercase leading-[0.88] tracking-[0.06em] text-stone-50 sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl">
-                                        {{ numberToWord(products.length) }} sauces.<br>Three slots.<br>One great box.
-                                    </h1>
-                                </div>
-
-                                <div>
-                                    <p class="max-w-2xl text-lg leading-8 text-stone-300">
-                                        Build a box from {{ numberToWord(products.length) }} 125ml bottles including
-                                        <strong class="text-stone-100"> Coder's Hot Mango</strong>,
-                                        <strong class="text-stone-100"> Coder's Hot Honey</strong>,
-                                        and <strong class="text-stone-100">Coder's Hot Chocolate</strong>.
-                                        Delivered anywhere in the UK for a flat fee of £19.99.
-                                    </p>
-                                    <Link href="#builder" class="fire-button px-4 py-2 mt-4">
-                                        Buy a box
-                                    </Link>
-                                </div>
-                            </div>
-
-                            <p v-if="checkoutError"
-                                class="rounded-2xl border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
-                                {{ checkoutError }}
-                            </p>
-
-                            <div class="grid gap-4 sm:grid-cols-3">
-                                <article v-for="item in credibility" :key="item.title" class="stat-card">
-                                    <p class="text-xs uppercase tracking-[0.28em] text-orange-300">
-                                        {{ item.title }}
-                                    </p>
-                                    <p class="mt-3 text-sm leading-7 text-stone-300">
-                                        {{ item.copy }}
-                                    </p>
-                                </article>
-                            </div>
-                        </div>
-
-                        <!-- Right: slot machine -->
-                        <SlotMachine :products="products" :box-limit="boxLimit" :checkout-label="checkoutLabel"
-                            :loading-checkout="loadingCheckout" @start-checkout="startCheckout" />
-                    </div>
-                </section>
+                <Hero :products="products" :box-limit="boxLimit" :checkout-label="checkoutLabel"
+                    :loading-checkout="loadingCheckout" :credibility="credibility" @start-checkout="startCheckout" />
 
                 <section id="bottles" class="pb-12">
                     <div class="mb-8 flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between px-5 md:px-0">
                         <div>
                             <p class="section-label">Choose from</p>
                             <h2
-                                class="mt-3 font-display text-5xl uppercase tracking-[0.08em] text-stone-50 sm:text-6xl">
+                                class="mt-3 font-display text-4xl sm:text-5xl uppercase tracking-[0.08em] text-stone-50 ">
                                 {{ numberToWord(products.length) }} 125ml bottles.<br>Buy One £19.99 Box.
                             </h2>
                         </div>
