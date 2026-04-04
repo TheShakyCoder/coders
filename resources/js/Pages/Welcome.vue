@@ -2,7 +2,10 @@
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 import { computed, onMounted, ref, watch } from 'vue';
-import SlotMachine from '@/Components/SlotMachine.vue';
+import SlotMachine from '@/Components/Sections/SlotMachine.vue';
+import Contact from '@/Components/Sections/Contact.vue';
+import FinalCta from '@/Components/Sections/FinalCta.vue';
+import Testimonials from '@/Components/Sections/Testimonials.vue';
 import { numberToWord } from '@/Composables/formatting';
 import Logo from '@/Components/Logo.vue';
 
@@ -136,20 +139,6 @@ const credibility = [
     },
 ];
 
-const testimonials = [
-    {
-        quote: "Chocolate Hot on sausage pizza is serious enough that I stopped sharing the bottle.",
-        role: 'Engineering Lead, Bristol',
-    },
-    {
-        quote: "Hot Mango plus Hot Honey is the right two-bottle answer for every Friday deployment.",
-        role: 'Product Designer, London',
-    },
-    {
-        quote: "Pizza now has a 4th dimension.",
-        role: 'Founder, Leeds',
-    },
-];
 
 const ourSauces = [
     'soya free',
@@ -377,264 +366,17 @@ const startCheckout = async () => {
                     </div>
                 </section>
 
-                <section id="proof" class="pb-16 px-10 md:px-0">
-                    <div class="mb-8 px-5 sm:px-0">
-                        <p class="section-label">Testimonials</p>
-                        <h2 class="mt-3 font-display text-5xl uppercase tracking-[0.08em] text-stone-50 sm:text-6xl">
-                            We would love to have.
-                        </h2>
-                    </div>
+                <Testimonials />
 
-                    <div class="grid gap-6 lg:grid-cols-3">
-                        <article v-for="testimonial in testimonials" :key="testimonial.role"
-                            class="glow-panel rounded-none sm:rounded-[2rem] p-8">
-                            <p class="text-lg leading-8 text-stone-200">
-                                "{{ testimonial.quote }}"
-                            </p>
-                            <p class="mt-6 text-xs uppercase tracking-[0.28em] text-orange-300">
-                                {{ testimonial.role }}
-                            </p>
-                        </article>
-                    </div>
-                </section>
-
-                <section id="contact" class="pb-16">
-                    <div class="glow-panel rounded-none sm:rounded-[2rem] p-8 sm:p-10">
-                        <p class="section-label">Get in touch</p>
-                        <h2 class="mt-4 font-display text-5xl uppercase tracking-[0.08em] text-stone-50">
-                            Contact Us.
-                        </h2>
-
-                        <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                            <!-- Email -->
-                            <a href="mailto:support@fig.limited"
-                                class="stat-card group flex items-start gap-4 hover:border-orange-500/30 transition-colors">
-                                <div class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-orange-500/10 text-orange-300">
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p class="text-xs uppercase tracking-[0.28em] text-orange-300">Email</p>
-                                    <p class="mt-2 text-sm text-stone-200 group-hover:text-orange-300 transition-colors break-all">
-                                        support@fig.limited
-                                    </p>
-                                </div>
-                            </a>
-
-                            <!-- Phone & WhatsApp -->
-                            <a href="https://wa.me/447515382159"
-                                class="stat-card group flex items-start gap-4 hover:border-orange-500/30 transition-colors">
-                                <div class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-orange-500/10 text-orange-300">
-                                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-                                        <path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.558 4.118 1.532 5.845L.057 23.885l6.212-1.448A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.013-1.378l-.36-.213-3.686.859.875-3.593-.235-.369A9.797 9.797 0 012.182 12c0-5.42 4.398-9.818 9.818-9.818 5.42 0 9.818 4.398 9.818 9.818 0 5.42-4.398 9.818-9.818 9.818z"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p class="text-xs uppercase tracking-[0.28em] text-orange-300">Mobile & WhatsApp</p>
-                                    <p class="mt-2 text-sm text-stone-200 group-hover:text-orange-300 transition-colors">
-                                        07515 382159
-                                    </p>
-                                </div>
-                            </a>
-
-                            <!-- Facebook -->
-                            <a href="https://www.facebook.com/coders.hot.sauce" target="_blank" rel="noopener"
-                                class="stat-card group flex items-start gap-4 hover:border-orange-500/30 transition-colors">
-                                <div class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-orange-500/10 text-orange-300">
-                                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p class="text-xs uppercase tracking-[0.28em] text-orange-300">Facebook</p>
-                                    <p class="mt-2 text-sm text-stone-200 group-hover:text-orange-300 transition-colors">
-                                        Coder's Hot Sauce
-                                    </p>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </section>
+                <Contact />
+                
+                <FinalCta />
             </main>
 
-            <footer
-                class="glow-panel rounded-none sm:rounded-[2rem] flex flex-col gap-6 px-6 py-8 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                    <p class="section-label">Final CTA</p>
-                    <h2 class="mt-3 font-display text-4xl uppercase tracking-[0.08em] text-stone-50">
-                        Fill the box before the next pizza lands.
-                    </h2>
-                </div>
-                <div class="flex flex-col gap-3 sm:flex-row">
-                    <a href="#builder" class="ghost-button text-center">Open the builder</a>
-                </div>
-            </footer>
         </div>
     </div>
 </template>
 
 <style scoped>
-/* ─── Machine shell (175deg gradient + multi-layer box-shadow can't be Tailwind) ── */
-.machine-shell {
-    border-radius: 1.6rem;
-    background: linear-gradient(175deg, #1c1917 0%, #0a0907 55%, #161009 100%);
-    border: 1px solid rgba(120, 113, 108, 0.28);
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.06),
-        inset 0 -6px 24px rgba(0, 0, 0, 0.7),
-        0 0 0 3px rgba(0, 0, 0, 0.5),
-        0 0 0 4px rgba(100, 90, 80, 0.12),
-        0 12px 40px rgba(0, 0, 0, 0.55);
-    overflow: hidden;
-    transition: box-shadow 0.4s ease;
-}
 
-@keyframes jackpot-pulse {
-
-    0%,
-    100% {
-        box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.06),
-            inset 0 -6px 24px rgba(0, 0, 0, 0.7),
-            0 0 0 3px rgba(0, 0, 0, 0.5),
-            0 0 0 4px rgba(100, 90, 80, 0.12),
-            0 12px 40px rgba(0, 0, 0, 0.55);
-    }
-
-    50% {
-        box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.06),
-            inset 0 -6px 24px rgba(0, 0, 0, 0.7),
-            0 0 0 3px rgba(0, 0, 0, 0.5),
-            0 0 0 4px rgba(249, 115, 22, 0.5),
-            0 12px 60px rgba(249, 115, 22, 0.35),
-            0 0 80px rgba(249, 115, 22, 0.15);
-    }
-}
-
-.machine-shell.jackpot-active {
-    animation: jackpot-pulse 0.55s ease-in-out 4;
-}
-
-/* ─── Marquee bulb lit state + flicker animation ─────────────── */
-@keyframes bulb-flicker {
-    from {
-        opacity: 1;
-    }
-
-    to {
-        opacity: 0.75;
-    }
-}
-
-.bulb-on {
-    background: #f97316 !important;
-    border-color: #fb923c !important;
-    box-shadow: 0 0 6px #f97316, 0 0 12px rgba(249, 115, 22, 0.4);
-    animation: bulb-flicker 0.8s ease-in-out infinite alternate;
-}
-
-/* ─── Reel viewport outer glow (::after pseudo-element) ──────── */
-.reel-viewport::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    box-shadow: 0 0 20px -4px var(--reel-glow, transparent);
-    pointer-events: none;
-    z-index: 5;
-    transition: box-shadow 0.4s ease;
-}
-
-/* ─── Reel button green pulse ─────────────────────────────────── */
-@keyframes reel-btn-pulse {
-
-    0%,
-    100% {
-        background: linear-gradient(135deg, rgba(34, 197, 94, 0.18), rgba(22, 163, 74, 0.08));
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 0 8px rgba(34, 197, 94, 0.3);
-        border-color: rgba(34, 197, 94, 0.35);
-    }
-
-    50% {
-        background: linear-gradient(135deg, rgba(34, 197, 94, 0.35), rgba(22, 163, 74, 0.18));
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 18px rgba(34, 197, 94, 0.6), 0 0 32px rgba(34, 197, 94, 0.2);
-        border-color: rgba(34, 197, 94, 0.65);
-    }
-}
-
-.reel-btn {
-    animation: reel-btn-pulse 2s ease-in-out infinite;
-    color: #86efac;
-}
-
-.reel-btn:disabled {
-    animation: none;
-}
-
-.reel-btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.45), rgba(22, 163, 74, 0.25));
-    border-color: rgba(34, 197, 94, 0.8);
-    color: #bbf7d0;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 24px rgba(34, 197, 94, 0.5);
-    animation: none;
-}
-
-/* ─── Spin random button hover ───────────────────────────────── */
-.spin-random-btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, rgba(249, 115, 22, 0.3) 0%, rgba(234, 88, 12, 0.16) 100%);
-    border-color: rgba(249, 115, 22, 0.6);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 0 24px rgba(249, 115, 22, 0.25);
-}
-
-/* ─── Vue reel transitions ───────────────────────────────────── */
-.reel-up-enter-from {
-    transform: translateY(-100%);
-    opacity: 0;
-}
-
-.reel-up-leave-to {
-    transform: translateY(100%);
-    opacity: 0;
-}
-
-.reel-up-enter-active {
-    transition: transform 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.14s ease;
-}
-
-.reel-up-leave-active {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.22s cubic-bezier(0.55, 0, 0.55, 0.2), opacity 0.14s ease;
-}
-
-.reel-down-enter-from {
-    transform: translateY(100%);
-    opacity: 0;
-}
-
-.reel-down-leave-to {
-    transform: translateY(-100%);
-    opacity: 0;
-}
-
-.reel-down-enter-active {
-    transition: transform 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.14s ease;
-}
-
-.reel-down-leave-active {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.22s cubic-bezier(0.55, 0, 0.55, 0.2), opacity 0.14s ease;
-}
 </style>
