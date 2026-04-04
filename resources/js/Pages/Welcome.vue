@@ -152,13 +152,13 @@ const testimonials = [
 ];
 
 const ourSauces = [
-    'free from soya',
-    'free from gluten',
-    'free from artificial colours',
-    'free from artificial flavours',
-    'free from artificial sweeteners',
-    'free from artificial preservatives',
-    'free from palm oil',
+    'soya free',
+    'gluten free',
+    'palm oil free',
+    'no artificial colours',
+    'no artificial flavours',
+    'no artificial sweeteners',
+    'no artificial preservatives',
 ]
 
 const checkoutLabel = computed(() => {
@@ -366,7 +366,6 @@ const startCheckout = async () => {
                         </div>
 
                         <div class="px-10 mt-10 md:mt-0">
-                            <h3 class="text-2xl font-bold text-orange-300">All our sauces are</h3>
                             <ul class="list-disc list-inside span-2 text-lg">
                                 <li v-for="sauce in ourSauces" :key="sauce">
                                     {{ sauce }}
