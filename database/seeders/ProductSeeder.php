@@ -25,6 +25,7 @@ class ProductSeeder extends Seeder
                     'image'            => $data['image'] ?? null,
                     'unit_amount'      => $data['unit_amount'] ?? 0,
                     'stripe_product_id'=> $data['stripe_product_id'] ?? null,
+                    'in_stock'         => $data['in_stock'] ?? true,
                     'can_sell'         => true,
                 ],
             );

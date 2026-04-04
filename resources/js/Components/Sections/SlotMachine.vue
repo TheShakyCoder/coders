@@ -179,6 +179,10 @@ const deliveryPreview = computed(() =>
 );
 
 const remainingSlots = computed(() => props.boxLimit - totalBottles.value);
+
+const hasOutOfStock = computed(() =>
+    selectedSlots.value.some(s => s && s.in_stock === false),
+);
 </script>
 
 <template>
@@ -252,7 +256,11 @@ const remainingSlots = computed(() => props.boxLimit - totalBottles.value);
 
                             <!-- Reel viewport -->
                             <div class="reel-viewport relative w-full overflow-hidden rounded-[14px] border bg-black/[0.82] shadow-[inset_0_2px_16px_rgba(0,0,0,0.8),inset_0_0_0_1px_rgba(255,255,255,0.03)] transition-[border-color] duration-500"
-                                :style="{
+                                :style="getReelItem(i).in_stock === false ? {
+                                    height: `${3 * 120}px`,
+                                    borderColor: 'rgba(239,68,68,0.3)',
+                                    '--reel-glow': 'rgba(239,68,68,0.5)',
+                                } : {
                                     height: `${3 * 120}px`,
                                     borderColor: getReelItem(i).accent + '60',
                                     '--reel-glow': getReelItem(i).accent,
@@ -265,8 +273,10 @@ const remainingSlots = computed(() => props.boxLimit - totalBottles.value);
                                     <div v-for="(item, si) in stripItems" :key="si"
                                         class="flex items-center justify-center" style="height: 120px">
                                         <img :src="item.image"
-                                            class="h-full w-full object-contain p-1 px-3"
-                                            :style="{ filter: `drop-shadow(0 0 10px ${item.accent}80)` }"
+                                            class="h-full w-full object-contain p-1 px-3 transition-[filter] duration-300"
+                                            :style="item.in_stock === false
+                                                ? { filter: 'grayscale(1) opacity(0.4)' }
+                                                : { filter: `drop-shadow(0 0 10px ${item.accent}80)` }"
                                             alt="" />
                                     </div>
                                 </div>
@@ -281,10 +291,19 @@ const remainingSlots = computed(() => props.boxLimit - totalBottles.value);
                                     :style="{
                                         top: '120px',
                                         height: '120px',
-                                        borderTopColor: getReelItem(i).accent + '55',
-                                        borderBottomColor: getReelItem(i).accent + '55',
-                                        background: getReelItem(i).accent + '0d',
+                                        borderTopColor: getReelItem(i).in_stock === false ? 'rgba(239,68,68,0.4)' : getReelItem(i).accent + '55',
+                                        borderBottomColor: getReelItem(i).in_stock === false ? 'rgba(239,68,68,0.4)' : getReelItem(i).accent + '55',
+                                        background: getReelItem(i).in_stock === false ? 'rgba(239,68,68,0.08)' : getReelItem(i).accent + '0d',
                                     }" />
+
+                                <!-- Out of stock badge -->
+                                <div v-if="!isSpinning && getReelItem(i).in_stock === false"
+                                    class="pointer-events-none absolute inset-x-0 z-[12] flex items-center justify-center"
+                                    style="top: 120px; height: 120px;">
+                                    <span class="rounded-full border border-red-500/40 bg-black/70 px-2 py-0.5 font-display text-[0.55rem] uppercase tracking-[0.2em] text-red-400 backdrop-blur-sm">
+                                        Out of Stock
+                                    </span>
+                                </div>
 
                                 <div
                                     class="pointer-events-none absolute inset-0 z-[15] rounded-[inherit] bg-gradient-to-b from-white/[0.05] via-transparent to-black/[0.15]" />
@@ -342,8 +361,12 @@ const remainingSlots = computed(() => props.boxLimit - totalBottles.value);
             </p>
         </div>
 
+        <div v-if="hasOutOfStock" class="mt-4 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            One or more selected sauces are out of stock. Spin to swap them out.
+        </div>
+
         <div class="mt-6 flex flex-col gap-3 sm:flex-row">
-            <button type="button" class="fire-button" :disabled="loadingCheckout || !isBoxFull" @click="startCheckout">
+            <button type="button" class="fire-button" :disabled="loadingCheckout || !isBoxFull || hasOutOfStock" @click="startCheckout">
                 {{ checkoutLabel }}
             </button>
         </div>

@@ -19,6 +19,7 @@ class ProductsService
                 'taste_label' => $p->taste_label,
                 'size_label' => $p->size_label,
                 'unit_amount' => $p->unit_amount,
+                'in_stock' => $p->in_stock,
                 'accent' => $p->accent,
                 'glow' => $p->glow,
                 'image' => $p->image,

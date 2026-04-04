@@ -31,6 +31,7 @@ return new class extends Migration
             $table->string('accent')->nullable();
             $table->string('glow')->nullable();
             $table->integer('unit_amount')->default(0);
+            $table->boolean('in_stock')->default(false);
             $table->timestamps();
             $table->softDeletes();
         });

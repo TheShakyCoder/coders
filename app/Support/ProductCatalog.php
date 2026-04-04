@@ -81,6 +81,12 @@ class ProductCatalog
 
                 $quantity = $group->sum('quantity');
 
+                if (($product['in_stock'] ?? false) === false) {
+                    throw ValidationException::withMessages([
+                        'items' => 'One of your selected sauces is currently out of stock.',
+                    ]);
+                }
+
                 if (blank($product['stripe_product_id'] ?? null)) {
                     throw ValidationException::withMessages([
                         'items' => 'One of the selected sauces is not connected to Stripe yet.',
