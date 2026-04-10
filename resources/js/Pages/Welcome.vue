@@ -1,7 +1,7 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import axios from 'axios';
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import Bottles from '@/Components/Sections/Bottles.vue';
 import Contact from '@/Components/Sections/Contact.vue';
 import FinalCta from '@/Components/Sections/FinalCta.vue';
@@ -32,42 +32,14 @@ const props = defineProps({
 const checkoutError = ref('');
 const loadingCheckout = ref(false);
 
-// Fruit machine state
-const EMPTY = { slug: null, name: 'Empty', size_label: 'No sauce selected', accent: '#44403c' };
-const reelItems = computed(() => [EMPTY, ...props.products]);
-const slotIndices = ref([0, 0, 0]);
-const jackpot = ref(false);
+// Slot machine state — updated via @change from Hero/SlotMachine
+const slotState = ref({ counts: {}, totalBottles: 0, selectedItemsPayload: [] });
 
-// Derived from slot machine
-const selectedSlots = computed(() =>
-    slotIndices.value.map(i => {
-        const item = reelItems.value[i];
-        return item.slug ? item : null;
-    }),
-);
+const onSlotChange = (payload) => { slotState.value = payload; };
 
-const totalBottles = computed(() => selectedSlots.value.filter(Boolean).length);
-const isBoxFull = computed(() => totalBottles.value === props.boxLimit);
-
-watch(isBoxFull, (full) => {
-    if (full) {
-        jackpot.value = true;
-        setTimeout(() => { jackpot.value = false; }, 2600);
-    }
-});
-
-const counts = computed(() =>
-    props.products.reduce((acc, p) => {
-        acc[p.slug] = selectedSlots.value.filter(s => s?.slug === p.slug).length;
-        return acc;
-    }, {}),
-);
-
-const selectedItemsPayload = computed(() =>
-    props.products
-        .filter(p => (counts.value[p.slug] ?? 0) > 0)
-        .map(p => ({ product: p.slug, quantity: counts.value[p.slug] })),
-);
+const counts = computed(() => slotState.value.counts);
+const totalBottles = computed(() => slotState.value.totalBottles);
+const selectedItemsPayload = computed(() => slotState.value.selectedItemsPayload);
 
 const credibility = [
     {
@@ -173,7 +145,8 @@ const startCheckout = async () => {
 
             <main class="flex-1">
                 <Hero :products="products" :box-limit="boxLimit" :checkout-label="checkoutLabel"
-                    :loading-checkout="loadingCheckout" :credibility="credibility" @start-checkout="startCheckout" />
+                    :loading-checkout="loadingCheckout" :credibility="credibility"
+                    @start-checkout="startCheckout" @change="onSlotChange" />
 
                 <Bottles :products="products" :counts="counts" :heat-scale="heatScale" />
 

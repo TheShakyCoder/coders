@@ -30,7 +30,7 @@ const props = defineProps({
     },
 });
 
-const emit = defineEmits(['start-checkout']);
+const emit = defineEmits(['start-checkout', 'change']);
 
 const startCheckout = () => {
     emit('start-checkout');
@@ -84,7 +84,8 @@ const startCheckout = () => {
 
             <!-- Right: slot machine -->
             <SlotMachine :products="products" :box-limit="boxLimit" :checkout-label="checkoutLabel"
-                :loading-checkout="loadingCheckout" @start-checkout="startCheckout" />
+                :loading-checkout="loadingCheckout" @start-checkout="startCheckout"
+                @change="(payload) => emit('change', payload)" />
         </div>
     </section>
 </template>
