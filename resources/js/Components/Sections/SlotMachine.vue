@@ -50,7 +50,7 @@ const getReelItem = (reelI, offset = 0) => {
 
 // ─── Spin logic ───────────────────────────────────────────────────────────────
 
-const spinUp = (i) => {
+const spinDown = (i) => {
   if (isSpinning.value) return;
   reelTransStyle.value[i] = "transform 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94)";
   reelStripIdx.value[i]--;
@@ -59,7 +59,7 @@ const spinUp = (i) => {
   }, 220);
 };
 
-const spinDown = (i) => {
+const spinUp = (i) => {
   if (isSpinning.value) return;
   reelTransStyle.value[i] = "transform 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94)";
   reelStripIdx.value[i]++;
