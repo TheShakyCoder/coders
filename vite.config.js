@@ -32,4 +32,7 @@ export default defineConfig({
             protocol: 'wss'
         }
     },
+    ssr: {
+        noExternal: true,
+    },
 });
