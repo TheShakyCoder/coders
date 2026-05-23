@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Tighten\Ziggy\Ziggy;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -42,6 +43,10 @@ class HandleInertiaRequests extends Middleware
                     'club_silver_ends_at' => $user->club_silver_ends_at?->toIso8601String(),
                     'club_silver_active' => $user->hasActiveClubSilver(),
                 ] : null,
+            ],
+            'ziggy' => fn () => [
+                ...(new Ziggy)->toArray(),
+                'location' => $request->url(),
             ],
         ];
     }
