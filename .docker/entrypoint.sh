@@ -46,5 +46,5 @@ CACHE_STORE=array php artisan view:cache
 # Ensure storage and cache are writable
 chown -R unit:unit /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Execute the CMD from Dockerfile via the official NGINX Unit entrypoint
-exec /usr/local/bin/docker-entrypoint.sh "$@"
+# Hand off to supervisord, which manages Unit (Laravel) + Node (Inertia SSR)
+exec "$@"

@@ -18,13 +18,19 @@ RUN npm run build
 # Stage 2: Production PHP Runtime
 FROM unit:1.34.1-php8.4
 
-# Install system dependencies
+# Install system dependencies (incl. Node.js 22 for Inertia SSR, and supervisor)
 RUN apt update && apt install -y \
     curl unzip git libicu-dev libzip-dev libpng-dev libjpeg-dev libfreetype6-dev libssl-dev netcat-openbsd \
+    ca-certificates gnupg supervisor \
+    && mkdir -p /etc/apt/keyrings \
+    && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
+    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main" > /etc/apt/sources.list.d/nodesource.list \
+    && apt update && apt install -y nodejs \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) pcntl opcache pdo pdo_mysql intl zip gd exif ftp bcmath \
     && pecl install redis \
     && docker-php-ext-enable redis \
+    && mkdir -p /var/log/supervisor \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Optimize PHP configuration
@@ -46,6 +52,9 @@ COPY . .
 # Copy compiled assets from Stage 1
 COPY --from=build-assets /app/public/build /var/www/html/public/build
 
+# Copy SSR bundle from Stage 1 (output of `vite build --ssr`)
+COPY --from=build-assets /app/bootstrap/ssr /var/www/html/bootstrap/ssr
+
 # Ensure permissions and install dependencies
 RUN mkdir -p storage bootstrap/cache \
     && chown -R unit:unit /var/www/html \
@@ -58,9 +67,10 @@ RUN php artisan route:cache
 # Secure entrypoint and configuration
 COPY unit.json /docker-entrypoint.d/unit.json
 COPY .docker/entrypoint.sh /entrypoint.sh
+COPY .docker/supervisor.conf /etc/supervisor/conf.d/app.conf
 RUN chmod +x /entrypoint.sh
 
 EXPOSE 80
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["unitd", "--no-daemon"]
+CMD ["supervisord", "-c", "/etc/supervisor/conf.d/app.conf"]
